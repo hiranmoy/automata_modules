@@ -6,11 +6,17 @@ from tcp import *
 
 
 
+gTcpMonitorThread = threading.Thread(target=MonitorTcpConnection)
+
+
 
 # ===================================	functions	================================
 def OnClosing():
 	# switch off bluetooth speaker and all appliances
 	ClearGPIO()
+
+	# stop tcp thread
+	ExitThread()
 
 	# end streaming/video, audio recording
 	EndStreaming()
@@ -33,6 +39,7 @@ def KillPrevProcesses():
 	command = "kill -9 `cat " + GetDumpArea() + "/.*pid`"
 	os.system(command)
 
+	ExitThread(0)
 
 
 # Restore previous settings from the settings.ini
@@ -131,6 +138,10 @@ os.system(command)
 EndStreaming(1)
 EndVideoRecording(1)
 EndAudioRecording(1)
+
+
+# start tcp monitor thread
+gTcpMonitorThread.start()
 
 
 # start tcp

@@ -2,17 +2,26 @@
 
 import commands
 import socket
+import threading
 
 from sensors import *
 
 
 
+gExit = 0
 gHost = commands.getstatusoutput('hostname -I')[1]		# Server IP or Hostname, like 192.168.1.100 
 gPort = 10001		# Pick an open Port (1000+ recommended), must match the client sport
+gConnected = 0
+gDataReceived = 0
 
 
 
 # ===================================	functions	================================
+def ExitThread(exit=1):
+	global gExit
+	gExit = exit
+
+
 # forcefully kills the tcp connection/port
 # resulting killing the whole program as well
 def KillTcp():
@@ -22,9 +31,12 @@ def KillTcp():
 
 
 def StartTcpThread():
+	global gDataReceived
+
 	bindFailed = 1
 	while bindFailed:
 		bindFailed = StartSocket()
+		gDataReceived = 0
 
 		# wait for 10 sec before trying a socket connection
 		time.sleep(10)
@@ -32,6 +44,9 @@ def StartTcpThread():
 
 
 def StartSocket():
+	global gConnected, gDataReceived
+	gConnected = 0
+
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	DumpActivity("Socket created", color.cWhite)
 
@@ -48,7 +63,7 @@ def StartSocket():
 	(conn, addr) = s.accept()
 	DumpActivity("Connected", color.cWhite)
 
-
+	gConnected = 1
 	quit = 0
 
 	# awaiting for message
@@ -59,7 +74,7 @@ def StartSocket():
 			DumpActivity("Connection interrupted", color.cRed)
 			break
  
-
+		gDataReceived = 1
 		reply = "Unknown command"
 
 		# return some data w.r.t a message
@@ -182,7 +197,30 @@ def StartSocket():
 	conn.close()
 	DumpActivity("Tcp connection terminated", color.cWhite)
 
+	gConnected = 0
 	if quit:
 		return 0
 
 	return 1
+
+
+def MonitorTcpConnection():
+	global gDataReceived
+
+	timeInSec = 0
+
+	while(1):
+		if gExit:
+			break
+
+		time.sleep(1)
+		timeInSec += 1
+
+		if (timeInSec == 30):
+			timeInSec = 0
+
+			if gConnected:
+				if (gDataReceived == 0):
+					KillTcp()
+
+				gDataReceived = 0
