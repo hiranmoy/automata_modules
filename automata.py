@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import shutil
+import sys
 
 from tcp import *
 
@@ -103,12 +104,58 @@ def RestoreSettings():
 	pSettingsFile.close()
 
 
+# ============================== process arguments ============================
+def ProcessArguments():
+	argIdx = 0
+	while (1):
+		argIdx += 1
+		if (argIdx >= len(sys.argv)):
+			break
+
+		arg = sys.argv[argIdx]
+
+
+		# add motion sensor
+		if (arg == "-addMotionSensor"):
+			AddMotionSensor()
+			continue
+
+
+		# add camera
+		if (arg == "-addCamera"):
+			AddCamera()
+			continue
+
+
+		# add lightings
+		if (arg == "-addLightings"):
+			argIdx += 1
+
+			nextArg = sys.argv[argIdx]
+			if nextArg.isdigit():
+				lightIdx = int(nextArg)
+				AddLightings(lightIdx)
+				continue
+
+
+		# invalid argument
+		print color.cRed.value + "Invalid argument : " + arg + color.cEnd.value
+		return 0
+
+	return 1
+
 
 # ===================================	run	======================================
-KillPrevProcesses()
+if (ProcessArguments() == 0):
+	OnClosing()
+	sys.exit()
+
 
 # Starting ... intialization
-ClearGPIO()
+SetupGPIOs()
+
+
+KillPrevProcesses()
 
 
 # load previous settings

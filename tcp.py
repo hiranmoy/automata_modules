@@ -82,101 +82,128 @@ def StartSocket():
 			reply = "ok"
 
 		elif (data == "ExtractMonitorStatus"):
-			temp = PopMonitorStatus()
-			reply = temp
+			if IsMotionSensorAdded():
+				temp = PopMonitorStatus()
+				reply = temp
 
 		elif (data == "ToggleLED"):
-			ToggleLED()
-			reply = str(GetPowerOnLED())
+			if (GetAddedLightings() == 1):
+				ToggleLED()
+				reply = str(GetPowerOnLED())
 
 		elif (data == "StartLiveFeed"):
-			StartStreaming()
-			reply = "on"
+			if IsCameraAdded():
+				StartStreaming()
+				reply = "on"
 
 		elif (data == "StopLiveFeed"):
-			EndStreaming()
-			reply = "off"
+			if IsCameraAdded():
+				EndStreaming()
+				reply = "off"
 
 		elif (data == "StartVideoRec"):
-			StartVideoRecording()
-			reply = "on"
+			if IsCameraAdded():
+				StartVideoRecording()
+				reply = "on"
 
 		elif (data == "StopVideoRec"):
-			EndVideoRecording()
-			reply = "off"
+			if IsCameraAdded():
+				EndVideoRecording()
+				reply = "off"
 
 		elif (data == "StartAudioRec"):
-			StartAudioRecording()
-			reply = "on"
+			if IsCameraAdded():
+				StartAudioRecording()
+				reply = "on"
 
 		elif (data == "StopAudioRec"):
-			EndAudioRecording()
-			reply = "off"
+			if IsCameraAdded():
+				EndAudioRecording()
+				reply = "off"
 
 
 		elif (data == "GetIsEnableMotionDetect"):
-			reply = str(GetIsEnableMotionSensor())
+			if IsMotionSensorAdded():
+				reply = str(GetIsEnableMotionSensor())
 
 		elif (data == "GetIsDisableVideo"):
-			reply = str(GetIsDisableVideo())
+			if IsCameraAdded():
+				reply = str(GetIsDisableVideo())
 
 		elif (data == "GetIsDisableAudio"):
-			reply = str(GetIsDisableAudio())
+			if IsCameraAdded():
+				reply = str(GetIsDisableAudio())
 
 		elif (data == "CheckIfOnFluLight"):
-			reply = str(CheckIfOnFluLight())
+			if (GetAddedLightings() == 1):
+				reply = str(CheckIfOnFluLight())
 
 		elif (data == "CheckIfOnPlug0"):
-			reply = str(CheckIfOnPlug0())
+			if (GetAddedLightings() == 1):
+				reply = str(CheckIfOnPlug0())
 
 		elif (data == "CheckIfOnFan"):
-			reply = str(CheckIfOnFan())
+			if (GetAddedLightings() == 1):
+				reply = str(CheckIfOnFan())
 
 		elif (data == "CheckIfOnBalconyLight"):
-			reply = str(CheckIfOnBalconyLight())
+			if (GetAddedLightings() == 1):
+				reply = str(CheckIfOnBalconyLight())
 
 		elif (data == "CheckIfOnBulb0"):
-			reply = str(CheckIfOnBulb0())
+			if (GetAddedLightings() == 1):
+				reply = str(CheckIfOnBulb0())
 
 		elif (data == "CheckIfOnPlug1"):
-			reply = str(CheckIfOnPlug1())
+			if (GetAddedLightings() == 1):
+				reply = str(CheckIfOnPlug1())
 
 
 		elif (data[0:18] == "EnableMotionDetect"):
-			EnableMotionSensor(int(data[19:20]))
-			reply = str(GetIsEnableMotionSensor())
+			if IsMotionSensorAdded():
+				EnableMotionSensor(int(data[19:20]))
+				reply = str(GetIsEnableMotionSensor())
 
 		elif (data[0:12] == "DisableVideo"):
-			SetDisableVideo(int(data[13:14]))
-			reply = str(GetIsDisableVideo())
+			if IsCameraAdded():
+				SetDisableVideo(int(data[13:14]))
+				reply = str(GetIsDisableVideo())
 
 		elif (data[0:12] == "DisableAudio"):
-			SetDisableAudio(int(data[13:14]))
-			reply = str(GetIsDisableAudio())
+			if IsCameraAdded():
+				SetDisableAudio(int(data[13:14]))
+				reply = str(GetIsDisableAudio())
 
 		elif (data[0:10] == "PowerOnFan"):
-			SwitchOnFan(int(data[11:12]))
-			reply = str(CheckIfOnFan())
+			if (GetAddedLightings() == 1):
+				SwitchOnFan(int(data[11:12]))
+				reply = str(CheckIfOnFan())
 
 		elif (data[0:15] == "PowerOnFluLight"):
-			SwitchOnFluLight(int(data[16:17]))
-			reply = str(CheckIfOnFluLight())
+			if (GetAddedLightings() == 1):
+				SwitchOnFluLight(int(data[16:17]))
+				reply = str(CheckIfOnFluLight())
 
 		elif (data[0:12] == "PowerOnPlug0"):
-			SwitchOnPlug0(int(data[13:14]))
-			reply = str(CheckIfOnPlug0())
+			if (GetAddedLightings() == 1):
+				SwitchOnPlug0(int(data[13:14]))
+				reply = str(CheckIfOnPlug0())
 
 		elif (data[0:19] == "PowerOnBalconyLight"):
-			SwitchOnBalconyLight(int(data[20:21]))
-			reply = str(CheckIfOnBalconyLight())
+			if (GetAddedLightings() == 1):
+				SwitchOnBalconyLight(int(data[20:21]))
+				reply = str(CheckIfOnBalconyLight())
 
 		elif (data[0:12] == "PowerOnBulb0"):
-			SwitchOnBulb0(int(data[13:14]))
-			reply = str(CheckIfOnBulb0())
+			if (GetAddedLightings() == 1):
+				SwitchOnBulb0(int(data[13:14]))
+				reply = str(CheckIfOnBulb0())
 
 		elif (data[0:12] == "PowerOnPlug1"):
-			SwitchOnPlug1(int(data[13:14]))
-			reply = str(CheckIfOnPlug1())
+			if (GetAddedLightings() == 1):
+				SwitchOnPlug1(int(data[13:14]))
+				reply = str(CheckIfOnPlug1())
+
 
 		# quit
 		elif (data == "quit"):
@@ -187,7 +214,7 @@ def StartSocket():
 
 		try:
 			conn.send(reply)
-			DumpActivity("Message: " + reply + " sent back in response to: " + data, color.cCyan)
+			DumpActivity("Message: " + reply + " sent back in response to: " + data + " at " + CurDateTimeStr(), color.cCyan)
 		except:
 			DumpActivity("Connection interrupted", color.cRed)
 			break

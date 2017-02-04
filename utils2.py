@@ -1,16 +1,35 @@
 #!/usr/bin/python
 
+import os
+import time
+import datetime
+
 from sense_hat import SenseHat
 
-from utils import *
+from enums import *
+from gpioSetup import *
 
 
+gDumpArea = "/home/pi/automation/dump/"
+gLogFile = "activity.log"
+gSettingsFile = "settings.ini"
+gSurvDir = "/home/backups/surveillance/motion_detection/"
+gRecDir = "/home/backups/surveillance/recordings/"
+
+gEnableMotionSensor = 0
+gDisableVideo = 0
+gDisableAudio = 0
+gEnableBluetooth = 0
+gPowerOnFluLight = 0
+gPowerOnPlug0 = 0
+gPowerOnFan = 0
+gPowerOnBalconyLight = 0
+gPowerOnBulb0 = 0
+gPowerOnPlug1 = 0
 
 gPowerOnLED = 0
 gCameraOn = 0
 gMicOn = 0
-gSurvDir = "/home/backups/surveillance/motion_detection/"
-gRecDir = "/home/backups/surveillance/recordings/"
 
 
 
@@ -19,12 +38,240 @@ def GetSurvDir():
 	return gSurvDir
 
 
+def GetDumpArea():
+	return gDumpArea
+
+
+def GetLogFile():
+	return (gDumpArea + gLogFile)
+
+
+def GetSettingsFile():
+	return (gDumpArea + gSettingsFile)
+
+
+def GetTime():
+	now = time.strftime("%H:%M:%S")
+	return now
+
+
+def GetIsEnableMotionSensor():
+	return gEnableMotionSensor
+
+
+def SetEnableMotionSensor(val=1):
+	if (IsMotionSensorAdded() != 1):
+		return
+
+	global gEnableMotionSensor
+	gEnableMotionSensor = val
+	SaveSettings()
+
+
+def GetIsDisableVideo():
+	return gDisableVideo
+
+
+def SetDisableVideo(val=1):
+	if (IsCameraAdded() != 1):
+		return
+
+	global gDisableVideo
+	gDisableVideo = val
+	SaveSettings()
+
+
+def GetIsDisableAudio():
+	return gDisableAudio
+
+
+def SetDisableAudio(val=1):
+	if (IsCameraAdded() != 1):
+		return
+
+	global gDisableAudio
+	gDisableAudio= val
+	SaveSettings()
+
+
+def SetBluetooth(val):
+	global gEnableBluetooth
+	gEnableBluetooth = val
+	SaveSettings()
+
+	#if (gEnableBluetooth):
+	#	GPIO.output(bluetoothGPIO, True)
+	#else:
+	#	GPIO.output(bluetoothGPIO, False)
+
+
+def CheckIfOnFluLight():
+	return gPowerOnFluLight
+
+
+def SwitchOnFluLight(val):
+	if (GetAddedLightings() != 1):
+		return
+
+	global gPowerOnFluLight
+	gPowerOnFluLight = val
+	SaveSettings()
+
+	if (gPowerOnFluLight):
+		GPIO.output(fluLightGPIO, True)
+	else:
+		GPIO.output(fluLightGPIO, False)
+
+
+def CheckIfOnPlug0():
+	return gPowerOnPlug0
+
+
+def SwitchOnPlug0(val):
+	if (GetAddedLightings() != 1):
+		return
+
+	global gPowerOnPlug0
+	gPowerOnPlug0 = val
+	SaveSettings()
+
+	if (gPowerOnPlug0):
+		GPIO.output(plug0GPIO, True)
+	else:
+		GPIO.output(plug0GPIO, False)
+
+
+def CheckIfOnFan():
+	return gPowerOnFan
+
+
+def SwitchOnFan(val):
+	if (GetAddedLightings() != 1):
+		return
+
+	global gPowerOnFan
+	gPowerOnFan = val
+	SaveSettings()
+
+	if (gPowerOnFan):
+		GPIO.output(fanGPIO, True)
+	else:
+		GPIO.output(fanGPIO, False)
+
+
+def CheckIfOnBalconyLight():
+	return gPowerOnBalconyLight
+
+
+def SwitchOnBalconyLight(val):
+	if (GetAddedLightings() != 1):
+		return
+
+	global gPowerOnBalconyLight
+	gPowerOnBalconyLight = val
+	SaveSettings()
+
+	if (gPowerOnBalconyLight):
+		GPIO.output(balconyLightGPIO, True)
+	else:
+		GPIO.output(balconyLightGPIO, False)
+
+
+def CheckIfOnBulb0():
+	return gPowerOnBulb0
+
+
+def SwitchOnBulb0(val):
+	if (GetAddedLightings() != 1):
+		return
+
+	global gPowerOnBulb0
+	gPowerOnBulb0 = val
+	SaveSettings()
+
+	if (gPowerOnBulb0):
+		GPIO.output(bulb0GPIO, True)
+	else:
+		GPIO.output(bulb0GPIO, False)
+
+
+def CheckIfOnPlug1():
+	return gPowerOnPlug1
+
+
+def SwitchOnPlug1(val):
+	if (GetAddedLightings() != 1):
+		return
+
+	global gPowerOnPlug1
+	gPowerOnPlug1 = val
+	SaveSettings()
+
+	if (gPowerOnPlug1):
+		GPIO.output(plug1GPIO, True)
+	else:
+		GPIO.output(plug1GPIO, False)
+
+
+def CurDateStr():
+	curDateTime = datetime.datetime.now()
+
+	curDateStr = str(curDateTime.date())
+	return curDateStr
+
+
+def CurTimeStr():
+	curDateTime = datetime.datetime.now()
+
+	curTimeStr = str(curDateTime.hour) + "-" + \
+							 str(curDateTime.minute) + "-" + \
+							 str(curDateTime.second)
+	return curTimeStr
+
+
+def CurDateTimeStr():
+	curDateTime = datetime.datetime.now()
+
+	curDateTimeStr = str(curDateTime.date()) + "-" + \
+									 str(curDateTime.hour) + "-" + \
+									 str(curDateTime.minute) + "-" + \
+									 str(curDateTime.second)
+	return curDateTimeStr
+
+
+def DumpActivity(dumpStr, colorCode):
+	pLogFile = open(GetLogFile(), "a")
+	print colorCode.value + dumpStr + color.cEnd.value
+	pLogFile.write("%s\n" % dumpStr)
+	pLogFile.close()
+
+
+def SaveSettings():
+	pSettingsFile = open(GetSettingsFile(), "w")
+
+	pSettingsFile.write(str(gEnableMotionSensor) + "    : Enable Motion Sensor\n")			# 1
+	pSettingsFile.write(str(gDisableVideo) + "    : Disable Video\n")										# 2
+	pSettingsFile.write(str(gDisableAudio) + "    : Disable Audio\n")										# 3
+	pSettingsFile.write(str(gEnableBluetooth) + "    : Enable Bluetooth\n")							# 4
+	pSettingsFile.write(str(gPowerOnFluLight) + "    : Switch on Fluorescent Light\n")	# 5
+	pSettingsFile.write(str(gPowerOnPlug0) + "    : Switch on Plug0\n")									# 6
+	pSettingsFile.write(str(gPowerOnFan) + "    : Switch on Fan\n")											# 7
+	pSettingsFile.write(str(gPowerOnBalconyLight) + "    : Switch on BalconyLight\n")		# 8
+	pSettingsFile.write(str(gPowerOnBulb0) + "    : Switch on Bulb0\n")									# 9
+	pSettingsFile.write(str(gPowerOnPlug1) + "    : Switch on Plug1\n")									# 10
+
+	pSettingsFile.close()
+
 def GetPowerOnLED():
 	return gPowerOnLED
 
 
 def SetPowerLED(on=1):
 	global gPowerOnLED
+
+	if (GetAddedLightings() != 1):
+		return
+
 	gPowerOnLED = on
 
 	if on:
@@ -50,6 +297,9 @@ def CheckForGlitch(channel, high):
 
 
 def TakeSnapshot():
+	if (IsCameraAdded() != 1):
+		return
+
 	if (GetIsDisableVideo() == 1):
 		return
 
@@ -64,6 +314,9 @@ def TakeSnapshot():
 
 
 def TakeShortClip():
+	if (IsCameraAdded() != 1):
+		return
+
 	if (GetIsDisableVideo() == 1):
 		return
 
@@ -78,6 +331,9 @@ def TakeShortClip():
 
 
 def RecordAudio():
+	if (IsCameraAdded() != 1):
+		return
+
 	if (GetIsDisableAudio() == 1):
 		return
 
@@ -99,6 +355,9 @@ def ToggleLED():
 
 
 def StartStreaming():
+	if (IsCameraAdded() != 1):
+		return
+
 	if (GetIsDisableVideo() == 1):
 		return
 
@@ -117,6 +376,9 @@ def StartStreaming():
 
 
 def EndStreaming(forced=0):
+	if (IsCameraAdded() != 1):
+		return
+
 	if ((forced == 0) & (GetIsDisableVideo() == 1)):
 		return
 
@@ -137,6 +399,9 @@ def EndStreaming(forced=0):
 
 
 def StartVideoRecording():
+	if (IsCameraAdded() != 1):
+		return
+
 	if (GetIsDisableVideo() == 1):
 		return
 
@@ -158,6 +423,9 @@ def StartVideoRecording():
 
 
 def EndVideoRecording(forced=0):
+	if (IsCameraAdded() != 1):
+		return
+
 	if ((forced == 0) & (GetIsDisableVideo() == 1)):
 		return
 
@@ -173,6 +441,9 @@ def EndVideoRecording(forced=0):
 
 
 def StartAudioRecording():
+	if (IsCameraAdded() != 1):
+		return
+
 	if (GetIsDisableAudio() == 1):
 		return
 
@@ -194,6 +465,9 @@ def StartAudioRecording():
 
 
 def EndAudioRecording(forced=0):
+	if (IsCameraAdded() != 1):
+		return
+
 	if ((forced == 0) & (GetIsDisableAudio() == 1)):
 		return
 

@@ -72,7 +72,7 @@ sub main
 			}
 
 			print "\nRestarting ...\n\n";
-			`/home/pi/automation/automata.py &`;
+			`/home/pi/automation/automata.py -addMotionSensor -addCamera -addLightings 1 &`;
 			print "Restarted and exited";
 			exit(0);
 		}

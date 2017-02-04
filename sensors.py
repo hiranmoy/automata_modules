@@ -4,23 +4,31 @@ import thread
 
 from utils2 import *
 
+
+
 gMonitorStatus = "-"
 
 
 
-def EnableTouchSensor():
-	GPIO.add_event_detect(touchGPIO, GPIO.RISING, callback=button_pressed)
-	DumpActivity("Touch button enabled at " + GetTime(), color.cWhite)
+#def EnableTouchSensor():
+#	GPIO.add_event_detect(touchGPIO, GPIO.RISING, callback=button_pressed)
+#	DumpActivity("Touch button enabled at " + GetTime(), color.cWhite)
 
 
 
 # =============================	motion sensor	==================================
 def SetMonitorStatus(status):
+	if (IsMotionSensorAdded() != 1):
+		return
+
 	global gMonitorStatus
 	gMonitorStatus = status
 
 
 def PopMonitorStatus():
+	if (IsMotionSensorAdded() != 1):
+		return
+
 	status = gMonitorStatus
 	SetMonitorStatus("-")
 
@@ -28,6 +36,9 @@ def PopMonitorStatus():
 
 
 def motion_detected(channel):
+	if (IsMotionSensorAdded() != 1):
+		return
+
 	if CheckForGlitch(channel, 1):
 		return
 
@@ -39,6 +50,9 @@ def motion_detected(channel):
 
 
 def EnableMotionSensor(enable=1):
+	if (IsMotionSensorAdded() != 1):
+		return
+
 	if (enable == 1):
 		GPIO.add_event_detect(motionGPIO, GPIO.RISING, callback=motion_detected)
 		DumpActivity("Motion detection enabled at " + GetTime(), color.cCyan)
@@ -51,6 +65,9 @@ def EnableMotionSensor(enable=1):
 
 
 def MotionDetectionEffects():
+	if (IsMotionSensorAdded() != 1):
+		return
+
 	curDateTime = datetime.datetime.now()
 	curSurvDir = GetSurvDir() + str(curDateTime.date())
 
