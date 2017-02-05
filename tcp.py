@@ -5,6 +5,7 @@ import socket
 import threading
 
 from sensors import *
+from lirc import *
 
 
 
@@ -121,7 +122,6 @@ def StartSocket():
 				EndAudioRecording()
 				reply = "off"
 
-
 		elif (data == "GetIsEnableMotionDetect"):
 			if IsMotionSensorAdded():
 				reply = str(GetIsEnableMotionSensor())
@@ -158,6 +158,19 @@ def StartSocket():
 			if (GetAddedLightings() == 1):
 				reply = str(CheckIfOnPlug1())
 
+		elif (data == "SetupLEDFloodLight"):
+			if IsLircAdded():
+				SetupLEDLight()
+				reply = "on"
+
+		elif (data == "SwitchOffLEDFloodLight"):
+			if IsLircAdded():
+				SetPowerLEDFloodLight(0)
+				reply = "off"
+
+		elif (data[0:13] == "ClickOnButton"):
+			if IsLircAdded():
+				reply = ClickOnButton(int(data[14:16]))
 
 		elif (data[0:18] == "EnableMotionDetect"):
 			if IsMotionSensorAdded():
@@ -233,6 +246,9 @@ def StartSocket():
 
 def MonitorTcpConnection():
 	global gDataReceived
+
+	if (IsMotionSensorAdded() != 1):
+		return
 
 	timeInSec = 0
 

@@ -106,6 +106,8 @@ def RestoreSettings():
 
 # ============================== process arguments ============================
 def ProcessArguments():
+	argStr = ""
+
 	argIdx = 0
 	while (1):
 		argIdx += 1
@@ -113,40 +115,45 @@ def ProcessArguments():
 			break
 
 		arg = sys.argv[argIdx]
-
+		argStr = argStr + " " + arg
 
 		# add motion sensor
 		if (arg == "-addMotionSensor"):
 			AddMotionSensor()
 			continue
 
-
 		# add camera
 		if (arg == "-addCamera"):
 			AddCamera()
 			continue
-
 
 		# add lightings
 		if (arg == "-addLightings"):
 			argIdx += 1
 
 			nextArg = sys.argv[argIdx]
+			argStr = argStr + " " + arg
+
 			if nextArg.isdigit():
 				lightIdx = int(nextArg)
 				AddLightings(lightIdx)
 				continue
 
+		# add lirc
+		if (arg == "-addLirc"):
+			AddLirc()
+			continue
 
 		# invalid argument
 		print color.cRed.value + "Invalid argument : " + arg + color.cEnd.value
-		return 0
+		return "-1"
 
-	return 1
+	return argStr
 
 
 # ===================================	run	======================================
-if (ProcessArguments() == 0):
+argStr = ProcessArguments()
+if (argStr == "-1"):
 	OnClosing()
 	sys.exit()
 
@@ -168,6 +175,7 @@ if (os.path.isdir(GetDumpArea())):
 
 os.makedirs(GetDumpArea())
 SaveSettings()
+DumpActivity("Arguments:" + argStr, color.cRed)
 
 
 # dump process id

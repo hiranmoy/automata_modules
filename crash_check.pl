@@ -72,7 +72,13 @@ sub main
 			}
 
 			print "\nRestarting ...\n\n";
-			`/home/pi/automation/automata.py -addMotionSensor -addCamera -addLightings 1 &`;
+
+			my $args = `cat "/home/pi/automation/arg.txt"`;
+			chomp $args;
+			print "/home/pi/automation/automata.py $args &\n";
+
+			`/home/pi/automation/automata.py $args &`;
+
 			print "Restarted and exited";
 			exit(0);
 		}

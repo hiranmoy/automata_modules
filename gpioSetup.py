@@ -19,6 +19,7 @@ fanGPIO = 12
 balconyLightGPIO = 26
 bulb0GPIO = 6
 plug1GPIO = 21
+ledFloodGPIO = 24
 
 
 
@@ -28,14 +29,12 @@ def SetupGPIOs():
 		# Motion sensor input (active high)
 		GPIO.setup(motionGPIO, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
-
 	# Touch sensor input (active high)
 	#GPIO.setup(touchGPIO, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 
 	# Bluetooth enable control (active high)
 	#GPIO.setup(bluetoothGPIO, GPIO.OUT)
-
 
 	if (GetAddedLightings() == 1):
 		# LED light control (active high)
@@ -65,6 +64,9 @@ def SetupGPIOs():
 		# Plug1 control (active high)
 		GPIO.setup(plug1GPIO, GPIO.OUT)
 
+	if IsLircAdded():
+		# LED flood light
+		GPIO.setup(ledFloodGPIO, GPIO.OUT)
 
 
 # clear all GPIOs
@@ -79,3 +81,6 @@ def ClearGPIO():
 		GPIO.output(balconyLightGPIO, False)
 		GPIO.output(bulb0GPIO, False)
 		GPIO.output(plug1GPIO, False)
+
+	if IsLircAdded():
+		GPIO.output(ledFloodGPIO, False)

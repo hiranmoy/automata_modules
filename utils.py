@@ -3,6 +3,7 @@
 gAddMotionSensor = 0
 gAddCamera = 0
 gAddLightings = 0
+gAddLirc = 0
 
 
 
@@ -32,3 +33,12 @@ def AddLightings(add):
 
 def GetAddedLightings():
 	return gAddLightings
+
+
+def AddLirc(add=1):
+	global gAddLirc
+	gAddLirc = add
+
+
+def IsLircAdded():
+	return gAddLirc
