@@ -75,12 +75,15 @@ def StartSocket():
 			DumpActivity("Connection interrupted", color.cRed)
 			break
  
-		gDataReceived = 1
 		reply = "Unknown command"
 
 		# return some data w.r.t a message
 		if (data == "Handshake"):
 			reply = "ok"
+
+		if (data == "IsConnected"):
+			gDataReceived = 1
+			reply = "connected"
 
 		elif (data == "ExtractMonitorStatus"):
 			if IsMotionSensorAdded():
@@ -246,9 +249,6 @@ def StartSocket():
 
 def MonitorTcpConnection():
 	global gDataReceived
-
-	if (IsMotionSensorAdded() != 1):
-		return
 
 	timeInSec = 0
 
