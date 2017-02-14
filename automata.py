@@ -149,6 +149,12 @@ def ProcessArguments():
 			SetDebugMode()
 			continue
 
+		# add senseHat
+		if (arg == "-addSenseHat"):
+			AddSenseHat()
+			ClearSenseHat()
+			continue
+
 		# invalid argument
 		print color.cRed.value + "Invalid argument : " + arg + color.cEnd.value
 		return "-1"
@@ -190,7 +196,7 @@ pProcessFile.close()
 
 
 # launch bg scripts
-if (IsDebugMode() == 0):
+if (IsDebugMode() != 1):
 	command = "/home/pi/automation/crash_check.pl &"
 	os.system(command)
 

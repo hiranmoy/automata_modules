@@ -4,6 +4,8 @@ gAddMotionSensor = 0
 gAddCamera = 0
 gAddLightings = 0
 gAddLirc = 0
+gDebugMode = 0
+gAddSenseHat = 0
 
 
 
@@ -42,3 +44,21 @@ def AddLirc(add=1):
 
 def IsLircAdded():
 	return gAddLirc
+
+
+def IsDebugMode():
+	return gDebugMode
+
+
+def SetDebugMode(on=1):
+	global gDebugMode
+	gDebugMode = on
+
+
+def AddSenseHat(add=1):
+	global gAddSenseHat
+	gAddSenseHat = add
+
+
+def IsSenseHatAdded():
+	return gAddSenseHat

@@ -85,6 +85,10 @@ def StartSocket():
 			gDataReceived = 1
 			reply = "connected"
 
+		elif (data == "Weather"):
+			if IsSenseHatAdded():
+				reply = GetTemperature() + "," + GetHumidity() + "," + GetPressure()
+
 		elif (data == "ExtractMonitorStatus"):
 			if IsMotionSensorAdded():
 				temp = PopMonitorStatus()

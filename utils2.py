@@ -16,8 +16,6 @@ gSettingsFile = "settings.ini"
 gSurvDir = "/home/backups/surveillance/motion_detection/"
 gRecDir = "/home/backups/surveillance/recordings/"
 
-gDebugMode = 0
-
 gEnableMotionSensor = 0
 gDisableVideo = 0
 gDisableAudio = 0
@@ -36,15 +34,6 @@ gMicOn = 0
 
 
 # ===================================	functions	================================
-def IsDebugMode():
-	return gDebugMode
-
-
-def SetDebugMode(on=1):
-	global gDebugMode
-	gDebugMode = on
-
-
 def GetSurvDir():
 	return gSurvDir
 
@@ -491,3 +480,38 @@ def EndAudioRecording(forced=0):
 	if (os.path.isfile(GetDumpArea() + "audio_rec_on_script.process")):
 		command = "kill -2 `cat " + GetDumpArea() + "audio_rec_on_script.process`"
 		os.system(command)
+
+
+def ClearSenseHat():
+	if (IsSenseHatAdded() != 1):
+		return
+
+	sense = SenseHat()
+	sense.clear()
+
+
+def GetTemperature():
+	if (IsSenseHatAdded() != 1):
+		return ""
+
+	sense = SenseHat()
+	temperature = str(sense.get_temperature())
+	return temperature[0:5]
+
+
+def GetHumidity():
+	if (IsSenseHatAdded() != 1):
+		return ""
+
+	sense = SenseHat()
+	humidity = str(sense.get_humidity())
+	return humidity[0:5]
+
+
+def GetPressure():
+	if (IsSenseHatAdded() != 1):
+		return ""
+
+	sense = SenseHat()
+	pressure = str(sense.get_pressure())
+	return pressure[0:6]
