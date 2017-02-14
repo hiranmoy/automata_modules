@@ -16,6 +16,8 @@ gSettingsFile = "settings.ini"
 gSurvDir = "/home/backups/surveillance/motion_detection/"
 gRecDir = "/home/backups/surveillance/recordings/"
 
+gDebugMode = 0
+
 gEnableMotionSensor = 0
 gDisableVideo = 0
 gDisableAudio = 0
@@ -34,6 +36,15 @@ gMicOn = 0
 
 
 # ===================================	functions	================================
+def IsDebugMode():
+	return gDebugMode
+
+
+def SetDebugMode(on=1):
+	global gDebugMode
+	gDebugMode = on
+
+
 def GetSurvDir():
 	return gSurvDir
 

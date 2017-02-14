@@ -250,6 +250,9 @@ def StartSocket():
 def MonitorTcpConnection():
 	global gDataReceived
 
+	if IsDebugMode():
+		return
+
 	timeInSec = 0
 
 	while(1):

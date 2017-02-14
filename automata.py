@@ -132,7 +132,7 @@ def ProcessArguments():
 			argIdx += 1
 
 			nextArg = sys.argv[argIdx]
-			argStr = argStr + " " + arg
+			argStr = argStr + " " + nextArg
 
 			if nextArg.isdigit():
 				lightIdx = int(nextArg)
@@ -142,6 +142,11 @@ def ProcessArguments():
 		# add lirc
 		if (arg == "-addLirc"):
 			AddLirc()
+			continue
+
+		# set debug mode
+		if (arg == "-debug"):
+			SetDebugMode()
 			continue
 
 		# invalid argument
@@ -185,8 +190,9 @@ pProcessFile.close()
 
 
 # launch bg scripts
-command = "/home/pi/automation/crash_check.pl &"
-os.system(command)
+if (IsDebugMode() == 0):
+	command = "/home/pi/automation/crash_check.pl &"
+	os.system(command)
 
 
 # end streaming/video, audio recording
