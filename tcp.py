@@ -41,6 +41,7 @@ def StartTcpThread():
 
 		# wait for 10 sec before trying a socket connection
 		time.sleep(10)
+		DumpActivity("Killing tcp connection after 10 sec of probable bind failed", color.cCyan)
 		KillTcp()
 
 
@@ -77,12 +78,13 @@ def StartSocket():
  
 		reply = "Unknown command"
 
+		gDataReceived = 1
+
 		# return some data w.r.t a message
 		if (data == "Handshake"):
 			reply = "ok"
 
 		if (data == "IsConnected"):
-			gDataReceived = 1
 			reply = "connected"
 
 		elif (data == "Weather"):
@@ -271,6 +273,7 @@ def MonitorTcpConnection():
 
 			if gConnected:
 				if (gDataReceived == 0):
+					DumpActivity("Killing tcp connection after not received any response from client for 1 min", color.cCyan)
 					KillTcp()
 
 				gDataReceived = 0

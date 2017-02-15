@@ -40,6 +40,13 @@ def KillPrevProcesses():
 	command = "kill -9 `cat " + GetDumpArea() + "/.*pid`"
 	os.system(command)
 
+	activityLog = GetDumpArea() + "activity.log"
+	# check if activity file exists
+	if os.path.isfile(activityLog):
+		# move activity file to home area
+		prevActivityLog = "/home/pi/activity.log"
+		shutil.move(activityLog, prevActivityLog)
+
 	ExitThread(0)
 
 
@@ -185,6 +192,13 @@ if (os.path.isdir(GetDumpArea())):
 	shutil.rmtree(GetDumpArea())
 
 os.makedirs(GetDumpArea())
+
+# move the previous activity file
+movedActivityLog = "/home/pi/activity.log"
+prevActivityLog = GetDumpArea() + "prevActivity.log"
+shutil.move(movedActivityLog, prevActivityLog)
+
+
 SaveSettings()
 DumpActivity("Arguments:" + argStr, color.cRed)
 
