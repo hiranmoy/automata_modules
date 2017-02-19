@@ -162,6 +162,16 @@ def ProcessArguments():
 			ClearSenseHat()
 			continue
 
+		# add touch sensor
+		if (arg == "-addTouchSensor"):
+			AddTouchSensor()
+			continue
+
+		# add gas sensor
+		if (arg == "-addGasSensor"):
+			AddGasSensor()
+			continue
+
 		# invalid argument
 		print color.cRed.value + "Invalid argument : " + arg + color.cEnd.value
 		return "-1"
@@ -195,8 +205,9 @@ os.makedirs(GetDumpArea())
 
 # move the previous activity file
 movedActivityLog = "/home/pi/activity.log"
-prevActivityLog = GetDumpArea() + "prevActivity.log"
-shutil.move(movedActivityLog, prevActivityLog)
+if os.path.isfile(movedActivityLog):
+	prevActivityLog = GetDumpArea() + "prevActivity.log"
+	shutil.move(movedActivityLog, prevActivityLog)
 
 
 SaveSettings()

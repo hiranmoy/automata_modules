@@ -6,6 +6,8 @@ gAddLightings = 0
 gAddLirc = 0
 gDebugMode = 0
 gAddSenseHat = 0
+gAddTouchSensor = 0
+gAddGasSensor = 0
 
 
 
@@ -62,3 +64,21 @@ def AddSenseHat(add=1):
 
 def IsSenseHatAdded():
 	return gAddSenseHat
+
+
+def AddTouchSensor(add=1):
+	global gAddTouchSensor
+	gAddTouchSensor = add
+
+
+def IsTouchSensorAdded():
+	return gAddTouchSensor
+
+
+def AddGasSensor(add=1):
+	global gAddGasSensor
+	gAddGasSensor = add
+
+
+def IsGasSensorAdded():
+	return gAddGasSensor

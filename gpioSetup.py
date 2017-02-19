@@ -10,8 +10,8 @@ GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 
 motionGPIO = 5
-#touchGPIO = 25
-bluetoothGPIO = 16
+touchGPIO = 25
+#bluetoothGPIO = 16
 lightGPIO = 20
 fluLightGPIO = 19
 plug0GPIO = 13
@@ -29,8 +29,9 @@ def SetupGPIOs():
 		# Motion sensor input (active high)
 		GPIO.setup(motionGPIO, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
-	# Touch sensor input (active high)
-	#GPIO.setup(touchGPIO, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+	if IsTouchSensorAdded():
+		# Touch sensor input (active high)
+		GPIO.setup(touchGPIO, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 
 	# Bluetooth enable control (active high)

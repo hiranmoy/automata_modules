@@ -2,6 +2,12 @@
 
 import thread
 
+from sense_hat import SenseHat
+
+#Read a value from analogue input 0
+#in A/D in the PCF8591P @ address 0x48
+from smbus import SMBus
+
 from utils2 import *
 
 
@@ -80,3 +86,56 @@ def MotionDetectionEffects():
 	thread.start_new_thread(RecordAudio, ())	# 3 sec
 
 	time.sleep(17)
+
+
+
+# ==================== temperature, humidity, air pressure sensor	==============
+def ClearSenseHat():
+	if (IsSenseHatAdded() != 1):
+		return
+
+	sense = SenseHat()
+	sense.clear()
+
+
+def GetTemperature():
+	if (IsSenseHatAdded() != 1):
+		return ""
+
+	sense = SenseHat()
+	temperature = str(sense.get_temperature())
+	return temperature[0:5]
+
+
+def GetHumidity():
+	if (IsSenseHatAdded() != 1):
+		return ""
+
+	sense = SenseHat()
+	humidity = str(sense.get_humidity())
+	return humidity[0:5]
+
+
+def GetPressure():
+	if (IsSenseHatAdded() != 1):
+		return ""
+
+	sense = SenseHat()
+	pressure = str(sense.get_pressure())
+	return pressure[0:6]
+
+
+
+# ==============================	gas sensor	==================================
+def GetAlcoholReading():
+	bus = SMBus(1)
+	bus.write_byte(0x48, 0) # set control register to read channel 0
+	reading = bus.read_byte(0x48) # read A/D
+	return str(reading)
+
+
+def GetCOReading():
+	bus = SMBus(1)
+	bus.write_byte(0x48, 1) # set control register to read channel 1
+	reading = bus.read_byte(0x48) # read A/D
+	return str(reading)

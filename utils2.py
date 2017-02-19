@@ -4,8 +4,6 @@ import os
 import time
 import datetime
 
-from sense_hat import SenseHat
-
 from enums import *
 from gpioSetup import *
 
@@ -480,38 +478,3 @@ def EndAudioRecording(forced=0):
 	if (os.path.isfile(GetDumpArea() + "audio_rec_on_script.process")):
 		command = "kill -2 `cat " + GetDumpArea() + "audio_rec_on_script.process`"
 		os.system(command)
-
-
-def ClearSenseHat():
-	if (IsSenseHatAdded() != 1):
-		return
-
-	sense = SenseHat()
-	sense.clear()
-
-
-def GetTemperature():
-	if (IsSenseHatAdded() != 1):
-		return ""
-
-	sense = SenseHat()
-	temperature = str(sense.get_temperature())
-	return temperature[0:5]
-
-
-def GetHumidity():
-	if (IsSenseHatAdded() != 1):
-		return ""
-
-	sense = SenseHat()
-	humidity = str(sense.get_humidity())
-	return humidity[0:5]
-
-
-def GetPressure():
-	if (IsSenseHatAdded() != 1):
-		return ""
-
-	sense = SenseHat()
-	pressure = str(sense.get_pressure())
-	return pressure[0:6]

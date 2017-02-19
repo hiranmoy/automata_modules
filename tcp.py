@@ -26,7 +26,7 @@ def ExitThread(exit=1):
 # forcefully kills the tcp connection/port
 # resulting killing the whole program as well
 def KillTcp():
-	DumpActivity("Killed tcp", color.cRed)
+	DumpActivity("Killed tcp at " + CurDateTimeStr(), color.cRed)
 	command = "sudo fuser -k " + str(gPort) + "/tcp"
 	os.system(command)
 
@@ -90,6 +90,10 @@ def StartSocket():
 		elif (data == "Weather"):
 			if IsSenseHatAdded():
 				reply = GetTemperature() + "," + GetHumidity() + "," + GetPressure()
+
+		elif (data == "AirQuality"):
+			if IsGasSensorAdded():
+				reply = GetAlcoholReading() + "," + GetCOReading()
 
 		elif (data == "ExtractMonitorStatus"):
 			if IsMotionSensorAdded():
