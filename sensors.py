@@ -12,13 +12,46 @@ from utils2 import *
 
 
 
+gTouchButtonPressed = 0
 gMonitorStatus = "-"
 
 
 
-#def EnableTouchSensor():
-#	GPIO.add_event_detect(touchGPIO, GPIO.RISING, callback=button_pressed)
-#	DumpActivity("Touch button enabled at " + GetTime(), color.cWhite)
+# =============================	touch sensor	==================================
+def SetTouchButtonPressed(pressed=1):
+	if (IsTouchSensorAdded() != 1):
+		return
+
+	global gTouchButtonPressed
+	gTouchButtonPressed = pressed
+
+
+def IsTouchButtonPressed():
+	if (IsTouchSensorAdded() != 1):
+		return 0
+
+	return gTouchButtonPressed
+
+
+def button_pressed(channel):
+	if (IsTouchSensorAdded() != 1):
+		return
+
+	if CheckForGlitch(channel, 1):
+		return
+
+	status = "Touch button pressed at " + GetTime()
+	DumpActivity(status, color.cGreen)
+
+	SetTouchButtonPressed()
+
+
+def EnableTouchSensor():
+	if (IsTouchSensorAdded() != 1):
+		return
+
+	GPIO.add_event_detect(touchGPIO, GPIO.RISING, callback=button_pressed)
+	DumpActivity("Touch button enabled at " + GetTime(), color.cYellow)
 
 
 
@@ -33,7 +66,7 @@ def SetMonitorStatus(status):
 
 def PopMonitorStatus():
 	if (IsMotionSensorAdded() != 1):
-		return
+		return ""
 
 	status = gMonitorStatus
 	SetMonitorStatus("-")
@@ -65,7 +98,6 @@ def EnableMotionSensor(enable=1):
 	else:
 		GPIO.remove_event_detect(motionGPIO)
 		DumpActivity("Motion detection disabled at " + GetTime(), color.cPink)
-		print ""
 
 	SetEnableMotionSensor(enable)
 

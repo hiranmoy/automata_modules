@@ -267,7 +267,7 @@ def GetPowerOnLED():
 def SetPowerLED(on=1):
 	global gPowerOnLED
 
-	if (GetAddedLightings() != 1):
+	if (GetAddedLightings() != 2):
 		return
 
 	gPowerOnLED = on

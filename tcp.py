@@ -100,8 +100,13 @@ def StartSocket():
 				temp = PopMonitorStatus()
 				reply = temp
 
+		elif (data == "ExtractTouchSensorStatus"):
+			if IsTouchSensorAdded():
+				reply = str(IsTouchButtonPressed())
+				SetTouchButtonPressed(0)
+				
 		elif (data == "ToggleLED"):
-			if (GetAddedLightings() == 1):
+			if (GetAddedLightings() == 2):
 				ToggleLED()
 				reply = str(GetPowerOnLED())
 
@@ -260,9 +265,6 @@ def StartSocket():
 def MonitorTcpConnection():
 	global gDataReceived
 
-	if IsDebugMode():
-		return
-
 	timeInSec = 0
 
 	while(1):
@@ -274,6 +276,13 @@ def MonitorTcpConnection():
 
 		if (timeInSec == 30):
 			timeInSec = 0
+
+			# unset touch button pressed status
+			SetTouchButtonPressed(0)
+
+			if (IsDebugMode() == 0):
+			# debug mode
+				continue
 
 			if gConnected:
 				if (gDataReceived == 0):

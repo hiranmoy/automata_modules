@@ -232,6 +232,10 @@ EndVideoRecording(1)
 EndAudioRecording(1)
 
 
+# enable touch sensor
+EnableTouchSensor()
+
+
 # start tcp monitor thread
 gTcpMonitorThread.start()
 

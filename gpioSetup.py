@@ -29,6 +29,7 @@ def SetupGPIOs():
 		# Motion sensor input (active high)
 		GPIO.setup(motionGPIO, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
+
 	if IsTouchSensorAdded():
 		# Touch sensor input (active high)
 		GPIO.setup(touchGPIO, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
@@ -37,11 +38,8 @@ def SetupGPIOs():
 	# Bluetooth enable control (active high)
 	#GPIO.setup(bluetoothGPIO, GPIO.OUT)
 
+
 	if (GetAddedLightings() == 1):
-		# LED light control (active high)
-		GPIO.setup(lightGPIO, GPIO.OUT)
-
-
 		# Fluorescent light control (active high)
 		GPIO.setup(fluLightGPIO, GPIO.OUT)
 
@@ -65,6 +63,12 @@ def SetupGPIOs():
 		# Plug1 control (active high)
 		GPIO.setup(plug1GPIO, GPIO.OUT)
 
+
+	if (GetAddedLightings() == 2):
+		# LED light control (active high)
+		GPIO.setup(lightGPIO, GPIO.OUT)
+
+
 	if IsLircAdded():
 		# LED flood light
 		GPIO.setup(ledFloodGPIO, GPIO.OUT)
@@ -75,13 +79,15 @@ def ClearGPIO():
 	#GPIO.output(bluetoothGPIO, False)
 
 	if (GetAddedLightings() == 1):
-		GPIO.output(lightGPIO, False)
 		GPIO.output(fluLightGPIO, False)
 		GPIO.output(plug0GPIO, False)
 		GPIO.output(fanGPIO, False)
 		GPIO.output(balconyLightGPIO, False)
 		GPIO.output(bulb0GPIO, False)
 		GPIO.output(plug1GPIO, False)
+
+	if (GetAddedLightings() == 2):
+		GPIO.output(lightGPIO, False)
 
 	if IsLircAdded():
 		GPIO.output(ledFloodGPIO, False)
