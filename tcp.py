@@ -93,7 +93,7 @@ def StartSocket():
 
 		elif (data == "AirQuality"):
 			if IsGasSensorAdded():
-				reply = GetAlcoholReading() + "," + GetCOReading()
+				reply = GetAlcoholReading() + "," + GetCOReading() + "," + GetSmokeReading()
 
 		elif (data == "ExtractMonitorStatus"):
 			if IsMotionSensorAdded():

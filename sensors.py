@@ -160,13 +160,29 @@ def GetPressure():
 
 # ==============================	gas sensor	==================================
 def GetAlcoholReading():
+	if (IsGasSensorAdded() != 1):
+		return ""
+
 	bus = SMBus(1)
-	bus.write_byte(0x48, 0) # set control register to read channel 0
+	bus.write_byte(0x48, 3) # set control register to read channel 3
 	reading = bus.read_byte(0x48) # read A/D
 	return str(reading)
 
 
 def GetCOReading():
+	if (IsGasSensorAdded() != 1):
+		return ""
+
+	bus = SMBus(1)
+	bus.write_byte(0x48, 2) # set control register to read channel 2
+	reading = bus.read_byte(0x48) # read A/D
+	return str(reading)
+
+
+def GetSmokeReading():
+	if (IsGasSensorAdded() != 1):
+		return ""
+
 	bus = SMBus(1)
 	bus.write_byte(0x48, 1) # set control register to read channel 1
 	reading = bus.read_byte(0x48) # read A/D
