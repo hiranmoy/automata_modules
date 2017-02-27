@@ -280,8 +280,8 @@ def MonitorTcpConnection():
 			# unset touch button pressed status
 			SetTouchButtonPressed(0)
 
-			if (IsDebugMode() == 0):
-			# debug mode
+			if IsDebugMode():
+				# debug mode
 				continue
 
 			if gConnected:
