@@ -1,11 +1,11 @@
 #!/usr/bin/python
 
 
-# -*- Visual basic -*-
+# -*- Python -*-
 
 #*****************************************************************
 #
-#        			 Copyright 2017 Hiranmoy Basak
+#        			 Copyright 2016 Hiranmoy Basak
 #
 #                  All Rights Reserved.
 #
@@ -183,27 +183,27 @@ def StartSocket():
 
 		elif (data == "CheckIfOnFluLight"):
 			if (GetAddedLightings() == 1):
-				reply = str(CheckIfOnFluLight())
+				reply = str(gFluLight.CheckIfOn())
 
 		elif (data == "CheckIfOnPlug0"):
 			if (GetAddedLightings() == 1):
-				reply = str(CheckIfOnPlug0())
+				reply = str(gPlug0.CheckIfOn())
 
 		elif (data == "CheckIfOnFan"):
 			if (GetAddedLightings() == 1):
-				reply = str(CheckIfOnFan())
+				reply = str(gFan.CheckIfOn())
 
 		elif (data == "CheckIfOnBalconyLight"):
 			if (GetAddedLightings() == 1):
-				reply = str(CheckIfOnBalconyLight())
+				reply = str(gBalconyLight.CheckIfOn())
 
 		elif (data == "CheckIfOnBulb0"):
 			if (GetAddedLightings() == 1):
-				reply = str(CheckIfOnBulb0())
+				reply = str(gBulb0.CheckIfOn())
 
 		elif (data == "CheckIfOnPlug1"):
 			if (GetAddedLightings() == 1):
-				reply = str(CheckIfOnPlug1())
+				reply = str(gPlug1.CheckIfOn())
 
 		elif (data == "SetupLEDFloodLight"):
 			if IsLircAdded():
@@ -236,33 +236,39 @@ def StartSocket():
 
 		elif (data[0:10] == "PowerOnFan"):
 			if (GetAddedLightings() == 1):
-				SwitchOnFan(int(data[11:12]))
-				reply = str(CheckIfOnFan())
+				gFan.SetPoweredOn(int(data[11:12]))
+				reply = str(gFan.CheckIfOn())
+				SaveSettings()
 
 		elif (data[0:15] == "PowerOnFluLight"):
 			if (GetAddedLightings() == 1):
-				SwitchOnFluLight(int(data[16:17]))
-				reply = str(CheckIfOnFluLight())
+				gFluLight.SetPoweredOn(int(data[16:17]))
+				reply = str(gFluLight.CheckIfOn())
+				SaveSettings()
 
 		elif (data[0:12] == "PowerOnPlug0"):
 			if (GetAddedLightings() == 1):
-				SwitchOnPlug0(int(data[13:14]))
-				reply = str(CheckIfOnPlug0())
+				gPlug0.SetPoweredOn(int(data[13:14]))
+				reply = str(gPlug0.CheckIfOn())
+				SaveSettings()
 
 		elif (data[0:19] == "PowerOnBalconyLight"):
 			if (GetAddedLightings() == 1):
-				SwitchOnBalconyLight(int(data[20:21]))
-				reply = str(CheckIfOnBalconyLight())
+				gBalconyLight.SetPoweredOn(int(data[20:21]))
+				reply = str(gBalconyLight.CheckIfOn())
+				SaveSettings()
 
 		elif (data[0:12] == "PowerOnBulb0"):
 			if (GetAddedLightings() == 1):
-				SwitchOnBulb0(int(data[13:14]))
-				reply = str(CheckIfOnBulb0())
+				gBulb0.SetPoweredOn(int(data[13:14]))
+				reply = str(gBulb0.CheckIfOn())
+				SaveSettings()
 
 		elif (data[0:12] == "PowerOnPlug1"):
 			if (GetAddedLightings() == 1):
-				SwitchOnPlug1(int(data[13:14]))
-				reply = str(CheckIfOnPlug1())
+				gPlug1.SetPoweredOn(int(data[13:14]))
+				reply = str(gPlug1.CheckIfOn())
+				SaveSettings()
 
 
 		# quit

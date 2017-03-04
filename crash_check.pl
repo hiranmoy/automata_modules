@@ -1,11 +1,11 @@
 #!/usr/bin/perl
 
 
-# -*- Visual basic -*-
+# -*- Perl -*-
 
 #*****************************************************************
 #
-#        Copyright 2017 Hiranmoy Basak
+#        Copyright 2016 Hiranmoy Basak
 #
 #                  All Rights Reserved.
 #

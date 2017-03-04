@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/usr/bin/python
 
 
-# -*- Bash -*-
+# -*- Python -*-
 
 #*****************************************************************
 #
-#        Copyright 2017 Hiranmoy Basak
+#        			 Copyright 2017 Hiranmoy Basak
 #
 #                  All Rights Reserved.
 #
@@ -29,16 +29,42 @@
 
 
 
-scriptProcessIdFile="/home/pi/automation/dump/audio_rec_on_script.process"
-arecord -D hw:1,0 -r 48000 -d 99999 -c 1 -f S16_LE "$1" &
+import os
+import time
 
-#get raspistill process id
-pid=$!
+from gpioSetup import *
 
-echo -n "raspivid process id: "
-echo $pid
-echo ""
 
-# dump process id in a file
-rm -f $scriptProcessIdFile
-echo -n $pid > $scriptProcessIdFile
+gPowerLogFile = "/home/pi/automation/power.log"
+
+
+
+# ===================================	class	===================================
+class Appliance:
+
+	def __init__(self, gpio):
+		# GPIO pin corresponding to this appliance
+		self.mGPIO = gpio
+
+		# switched on status
+		self.mPoweredOn = 0
+
+
+	def SetPoweredOn(self, on=1):
+		if (GetAddedLightings() != 1):
+			return
+
+		self.mPoweredOn = on
+
+		if (self.mPoweredOn):
+			GPIO.output(self.mGPIO, True)
+		else:
+			GPIO.output(self.mGPIO, False)
+
+
+	def CheckIfOn(self):
+		return self.mPoweredOn
+
+
+
+# ===================================	functions	================================

@@ -1,11 +1,11 @@
 #!/usr/bin/python
 
 
-# -*- Visual basic -*-
+# -*- Python -*-
 
 #*****************************************************************
 #
-#        			 Copyright 2017 Hiranmoy Basak
+#        			 Copyright 2016 Hiranmoy Basak
 #
 #                  All Rights Reserved.
 #
@@ -34,7 +34,7 @@ import time
 import datetime
 
 from enums import *
-from gpioSetup import *
+from appliance import *
 
 
 gDumpArea = "/home/pi/automation/dump/"
@@ -47,12 +47,13 @@ gEnableMotionSensor = 0
 gDisableVideo = 0
 gDisableAudio = 0
 gEnableBluetooth = 0
-gPowerOnFluLight = 0
-gPowerOnPlug0 = 0
-gPowerOnFan = 0
-gPowerOnBalconyLight = 0
-gPowerOnBulb0 = 0
-gPowerOnPlug1 = 0
+
+gFluLight = Appliance(fluLightGPIO)
+gPlug0 = Appliance(plug0GPIO)
+gFan = Appliance(fanGPIO)
+gBalconyLight = Appliance(balconyLightGPIO)
+gBulb0 = Appliance(bulb0GPIO)
+gPlug1 = Appliance(plug1GPIO)
 
 gPowerOnLED = 0
 gCameraOn = 0
@@ -132,114 +133,6 @@ def SetBluetooth(val):
 	#	GPIO.output(bluetoothGPIO, False)
 
 
-def CheckIfOnFluLight():
-	return gPowerOnFluLight
-
-
-def SwitchOnFluLight(val):
-	if (GetAddedLightings() != 1):
-		return
-
-	global gPowerOnFluLight
-	gPowerOnFluLight = val
-	SaveSettings()
-
-	if (gPowerOnFluLight):
-		GPIO.output(fluLightGPIO, True)
-	else:
-		GPIO.output(fluLightGPIO, False)
-
-
-def CheckIfOnPlug0():
-	return gPowerOnPlug0
-
-
-def SwitchOnPlug0(val):
-	if (GetAddedLightings() != 1):
-		return
-
-	global gPowerOnPlug0
-	gPowerOnPlug0 = val
-	SaveSettings()
-
-	if (gPowerOnPlug0):
-		GPIO.output(plug0GPIO, True)
-	else:
-		GPIO.output(plug0GPIO, False)
-
-
-def CheckIfOnFan():
-	return gPowerOnFan
-
-
-def SwitchOnFan(val):
-	if (GetAddedLightings() != 1):
-		return
-
-	global gPowerOnFan
-	gPowerOnFan = val
-	SaveSettings()
-
-	if (gPowerOnFan):
-		GPIO.output(fanGPIO, True)
-	else:
-		GPIO.output(fanGPIO, False)
-
-
-def CheckIfOnBalconyLight():
-	return gPowerOnBalconyLight
-
-
-def SwitchOnBalconyLight(val):
-	if (GetAddedLightings() != 1):
-		return
-
-	global gPowerOnBalconyLight
-	gPowerOnBalconyLight = val
-	SaveSettings()
-
-	if (gPowerOnBalconyLight):
-		GPIO.output(balconyLightGPIO, True)
-	else:
-		GPIO.output(balconyLightGPIO, False)
-
-
-def CheckIfOnBulb0():
-	return gPowerOnBulb0
-
-
-def SwitchOnBulb0(val):
-	if (GetAddedLightings() != 1):
-		return
-
-	global gPowerOnBulb0
-	gPowerOnBulb0 = val
-	SaveSettings()
-
-	if (gPowerOnBulb0):
-		GPIO.output(bulb0GPIO, True)
-	else:
-		GPIO.output(bulb0GPIO, False)
-
-
-def CheckIfOnPlug1():
-	return gPowerOnPlug1
-
-
-def SwitchOnPlug1(val):
-	if (GetAddedLightings() != 1):
-		return
-
-	global gPowerOnPlug1
-	gPowerOnPlug1 = val
-	SaveSettings()
-
-	if (gPowerOnPlug1):
-		GPIO.output(plug1GPIO, True)
-	else:
-		GPIO.output(plug1GPIO, False)
-
-
 def CurDateStr():
 	curDateTime = datetime.datetime.now()
 
@@ -280,12 +173,12 @@ def SaveSettings():
 	pSettingsFile.write(str(gDisableVideo) + "    : Disable Video\n")										# 2
 	pSettingsFile.write(str(gDisableAudio) + "    : Disable Audio\n")										# 3
 	pSettingsFile.write(str(gEnableBluetooth) + "    : Enable Bluetooth\n")							# 4
-	pSettingsFile.write(str(gPowerOnFluLight) + "    : Switch on Fluorescent Light\n")	# 5
-	pSettingsFile.write(str(gPowerOnPlug0) + "    : Switch on Plug0\n")									# 6
-	pSettingsFile.write(str(gPowerOnFan) + "    : Switch on Fan\n")											# 7
-	pSettingsFile.write(str(gPowerOnBalconyLight) + "    : Switch on BalconyLight\n")		# 8
-	pSettingsFile.write(str(gPowerOnBulb0) + "    : Switch on Bulb0\n")									# 9
-	pSettingsFile.write(str(gPowerOnPlug1) + "    : Switch on Plug1\n")									# 10
+	pSettingsFile.write(str(gFluLight.CheckIfOn()) + "    : Switch on Fluorescent Light\n")	# 5
+	pSettingsFile.write(str(gPlug0.CheckIfOn()) + "    : Switch on Plug0\n")									# 6
+	pSettingsFile.write(str(gFan.CheckIfOn()) + "    : Switch on Fan\n")											# 7
+	pSettingsFile.write(str(gBalconyLight.CheckIfOn()) + "    : Switch on BalconyLight\n")		# 8
+	pSettingsFile.write(str(gBulb0.CheckIfOn()) + "    : Switch on Bulb0\n")									# 9
+	pSettingsFile.write(str(gPlug1.CheckIfOn()) + "    : Switch on Plug1\n")									# 10
 
 	pSettingsFile.close()
 

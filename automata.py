@@ -1,11 +1,11 @@
 #!/usr/bin/python
 
 
-# -*- Visual basic -*-
+# -*- Python -*-
 
 #*****************************************************************
 #
-#        			 Copyright 2017 Hiranmoy Basak
+#        			 Copyright 2016 Hiranmoy Basak
 #
 #                  All Rights Reserved.
 #
@@ -110,27 +110,27 @@ def RestoreSettings():
 
 		elif (lineNum == 5):
 			# Switch on Fluorescent light
-			SwitchOnFluLight(int(val))
+			gFluLight.SetPoweredOn(int(val))
 
 		elif (lineNum == 6):
 			# Switch on Plug0
-			SwitchOnPlug0(int(val))
+			gPlug0.SetPoweredOn(int(val))
 
 		elif (lineNum == 7):
 			# Switch on Fan
-			SwitchOnFan(int(val))
+			gFan.SetPoweredOn(int(val))
 
 		elif (lineNum == 8):
 			# Switch on balcony light
-			SwitchOnBalconyLight(int(val))
+			gBalconyLight.SetPoweredOn(int(val))
 
 		elif (lineNum == 9):
 			# Switch on bulb0
-			SwitchOnBulb0(int(val))
+			gBulb0.SetPoweredOn(int(val))
 
 		elif (lineNum == 10):
 			# Switch on Plug1
-			SwitchOnPlug1(int(val))
+			gPlug1.SetPoweredOn(int(val))
 
 		else:
 			pSettingsFile.close()
