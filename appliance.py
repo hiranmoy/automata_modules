@@ -31,23 +31,29 @@
 
 import os
 import time
+import datetime
 
 from gpioSetup import *
-
-
-gPowerLogFile = "/home/pi/automation/power.log"
 
 
 
 # ===================================	class	===================================
 class Appliance:
 
-	def __init__(self, gpio):
+	def __init__(self, gpio, name):
 		# GPIO pin corresponding to this appliance
 		self.mGPIO = gpio
 
+		# set name
+		self.mName = name
+
 		# switched on status
 		self.mPoweredOn = 0
+
+		# initialize switched on info
+		self.mProfile = []
+		for idx in range(24):
+			self.mProfile.append(0)
 
 
 	def SetPoweredOn(self, on=1):
@@ -66,5 +72,42 @@ class Appliance:
 		return self.mPoweredOn
 
 
+	def GetSwitchedOnProfile(self):
+		profileStr = ""
 
-# ===================================	functions	================================
+		for idx in range(24):
+			if (idx > 0):
+				profileStr = profileStr + ","
+
+			profileStr = profileStr + str(self.mProfile[idx])
+
+		return profileStr
+
+
+	def UpdateSwitchedProfile(self):
+		if (GetAddedLightings() != 1):
+			return
+
+		if self.mPoweredOn:
+			self.mProfile[datetime.datetime.now().hour] += 1
+
+
+	def SaveProfle(self, pProfileFile):
+		pProfileFile.write("%20s : %s\n" % (self.mName, self.GetSwitchedOnProfile()))
+
+
+	def RestoreProfle(self, lineInput):
+		if (GetAddedLightings() != 1):
+			return
+
+		data = lineInput[23:]
+
+		profileArr = data.split(',')
+		numHrs = profileArr.__len__()
+
+		if (numHrs != 24):
+			print color.cCyan.value + "Invalid power info for " + self.mName + color.cEnd.value
+			return
+
+		for idx in range(24):
+			self.mProfile[idx] = int(profileArr[idx])

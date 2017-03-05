@@ -38,7 +38,6 @@ from lirc import *
 
 
 
-gExit = 0
 gHost = commands.getstatusoutput('hostname -I')[1]		# Server IP or Hostname, like 192.168.1.100 
 gPort = 10001		# Pick an open Port (1000+ recommended), must match the client sport
 gConnected = 0
@@ -47,11 +46,6 @@ gDataReceived = 0
 
 
 # ===================================	functions	================================
-def ExitThread(exit=1):
-	global gExit
-	gExit = exit
-
-
 # forcefully kills the tcp connection/port
 # resulting killing the whole program as well
 def KillTcp():
@@ -270,6 +264,30 @@ def StartSocket():
 				reply = str(gPlug1.CheckIfOn())
 				SaveSettings()
 
+		elif (data == "GetFluLightProfile"):
+			if (GetAddedLightings() == 1):
+				reply = gFluLight.GetSwitchedOnProfile()
+
+		elif (data == "GetPlug0Profile"):
+			if (GetAddedLightings() == 1):
+				reply = gPlug0.GetSwitchedOnProfile()
+
+		elif (data == "GetBalconyLightProfile"):
+			if (GetAddedLightings() == 1):
+				reply = gBalconyLight.GetSwitchedOnProfile()
+
+		elif (data == "GetFanProfile"):
+			if (GetAddedLightings() == 1):
+				reply = gFan.GetSwitchedOnProfile()
+
+		elif (data == "GetPlug1Profile"):
+			if (GetAddedLightings() == 1):
+				reply = gPlug1.GetSwitchedOnProfile()
+
+		elif (data == "GetBulb0Profile"):
+			if (GetAddedLightings() == 1):
+				reply = gBulb0.GetSwitchedOnProfile()
+
 
 		# quit
 		elif (data == "quit"):
@@ -303,7 +321,7 @@ def MonitorTcpConnection():
 	timeInSec = 0
 
 	while(1):
-		if gExit:
+		if IsExitTread():
 			break
 
 		time.sleep(1)
@@ -311,9 +329,6 @@ def MonitorTcpConnection():
 
 		if (timeInSec == 30):
 			timeInSec = 0
-
-			# unset touch button pressed status
-			SetTouchButtonPressed(0)
 
 			if IsDebugMode():
 				# debug mode

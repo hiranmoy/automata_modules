@@ -29,10 +29,6 @@
 
 
 
-import os
-import time
-import datetime
-
 from enums import *
 from appliance import *
 
@@ -42,26 +38,37 @@ gLogFile = "activity.log"
 gSettingsFile = "settings.ini"
 gSurvDir = "/home/backups/surveillance/motion_detection/"
 gRecDir = "/home/backups/surveillance/recordings/"
+gPowerLog = "/home/pi/automation/power.log"
 
 gEnableMotionSensor = 0
 gDisableVideo = 0
 gDisableAudio = 0
 gEnableBluetooth = 0
 
-gFluLight = Appliance(fluLightGPIO)
-gPlug0 = Appliance(plug0GPIO)
-gFan = Appliance(fanGPIO)
-gBalconyLight = Appliance(balconyLightGPIO)
-gBulb0 = Appliance(bulb0GPIO)
-gPlug1 = Appliance(plug1GPIO)
+gFluLight = Appliance(fluLightGPIO, "fluLight")
+gPlug0 = Appliance(plug0GPIO, "plug0")
+gFan = Appliance(fanGPIO, "fan")
+gBalconyLight = Appliance(balconyLightGPIO, "balconyLight")
+gBulb0 = Appliance(bulb0GPIO, "bulb0")
+gPlug1 = Appliance(plug1GPIO, "plug1")
 
 gPowerOnLED = 0
 gCameraOn = 0
 gMicOn = 0
+gExit = 0
 
 
 
 # ===================================	functions	================================
+def ExitThread(exit=1):
+	global gExit
+	gExit = exit
+
+
+def IsExitTread():
+	return gExit
+
+
 def GetSurvDir():
 	return gSurvDir
 
@@ -169,11 +176,11 @@ def DumpActivity(dumpStr, colorCode):
 def SaveSettings():
 	pSettingsFile = open(GetSettingsFile(), "w")
 
-	pSettingsFile.write(str(gEnableMotionSensor) + "    : Enable Motion Sensor\n")			# 1
-	pSettingsFile.write(str(gDisableVideo) + "    : Disable Video\n")										# 2
-	pSettingsFile.write(str(gDisableAudio) + "    : Disable Audio\n")										# 3
-	pSettingsFile.write(str(gEnableBluetooth) + "    : Enable Bluetooth\n")							# 4
-	pSettingsFile.write(str(gFluLight.CheckIfOn()) + "    : Switch on Fluorescent Light\n")	# 5
+	pSettingsFile.write(str(gEnableMotionSensor) + "    : Enable Motion Sensor\n")						# 1
+	pSettingsFile.write(str(gDisableVideo) + "    : Disable Video\n")													# 2
+	pSettingsFile.write(str(gDisableAudio) + "    : Disable Audio\n")													# 3
+	pSettingsFile.write(str(gEnableBluetooth) + "    : Enable Bluetooth\n")										# 4
+	pSettingsFile.write(str(gFluLight.CheckIfOn()) + "    : Switch on Fluorescent Light\n")		# 5
 	pSettingsFile.write(str(gPlug0.CheckIfOn()) + "    : Switch on Plug0\n")									# 6
 	pSettingsFile.write(str(gFan.CheckIfOn()) + "    : Switch on Fan\n")											# 7
 	pSettingsFile.write(str(gBalconyLight.CheckIfOn()) + "    : Switch on BalconyLight\n")		# 8
@@ -181,6 +188,59 @@ def SaveSettings():
 	pSettingsFile.write(str(gPlug1.CheckIfOn()) + "    : Switch on Plug1\n")									# 10
 
 	pSettingsFile.close()
+
+
+def SaveProfileOfAll():
+	if (GetAddedLightings() != 1):
+		return
+
+	pProfileFile = open(gPowerLog, "w")
+
+	gFluLight.SaveProfle(pProfileFile)						# 1
+	gPlug0.SaveProfle(pProfileFile)								# 2
+	gFan.SaveProfle(pProfileFile)									# 3
+	gBalconyLight.SaveProfle(pProfileFile)				# 4
+	gBulb0.SaveProfle(pProfileFile)								# 5
+	gPlug1.SaveProfle(pProfileFile)								# 6
+
+	pProfileFile.close()
+
+
+def RestoreProfileOfAll():
+	if (GetAddedLightings() != 1):
+		return
+
+	# check for power log
+	if (os.path.isfile(gPowerLog) == 0):
+		print color.cCyan.value + "No power info" + color.cEnd.value
+		return
+
+	pProfileFile = open(gPowerLog, "r")
+
+	lineNum = 0
+	for line in pProfileFile:
+		lineNum += 1
+
+		if (lineNum == 1):
+			gFluLight.RestoreProfle(line)
+
+		if (lineNum == 2):
+			gPlug0.RestoreProfle(line)
+
+		if (lineNum == 3):
+			gFan.RestoreProfle(line)
+
+		if (lineNum == 4):
+			gBalconyLight.RestoreProfle(line)
+
+		if (lineNum == 5):
+			gBulb0.RestoreProfle(line)
+
+		if (lineNum == 6):
+			gPlug1.RestoreProfle(line)
+
+	pProfileFile.close()
+
 
 def GetPowerOnLED():
 	return gPowerOnLED

@@ -37,6 +37,7 @@ from tcp import *
 
 
 gTcpMonitorThread = threading.Thread(target=MonitorTcpConnection)
+gTimer1MinThread = threading.Thread(target=Timer1Min)
 
 
 
@@ -173,6 +174,11 @@ def ProcessArguments():
 			if nextArg.isdigit():
 				lightIdx = int(nextArg)
 				AddLightings(lightIdx)
+
+				# load previous power data
+				if (GetAddedLightings() == 1):
+					RestoreProfileOfAll()
+
 				continue
 
 		# add lirc
@@ -267,6 +273,10 @@ EnableTouchSensor()
 
 # start tcp monitor thread
 gTcpMonitorThread.start()
+
+
+# start 1 min timer thread
+gTimer1MinThread.start()
 
 
 # start tcp

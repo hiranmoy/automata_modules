@@ -216,3 +216,33 @@ def GetSmokeReading():
 	bus.write_byte(0x48, 1) # set control register to read channel 1
 	reading = bus.read_byte(0x48) # read A/D
 	return str(reading)
+
+
+
+# ===================================	timer	===================================
+def Timer1Min():
+	timeInSec = 0
+
+	while(1):
+		if gExit:
+			break
+
+		time.sleep(1)
+		timeInSec += 1
+
+		if (timeInSec == 60):
+			timeInSec = 0
+
+			if IsTouchSensorAdded():
+				# unset touch button pressed status
+				SetTouchButtonPressed(0)
+
+			if (GetAddedLightings() == 1):
+				gFluLight.UpdateSwitchedProfile()
+				gPlug0.UpdateSwitchedProfile()
+				gFan.UpdateSwitchedProfile()
+				gBalconyLight.UpdateSwitchedProfile()
+				gBulb0.UpdateSwitchedProfile()
+				gPlug1.UpdateSwitchedProfile()
+
+				SaveProfileOfAll()
