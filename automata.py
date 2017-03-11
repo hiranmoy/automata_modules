@@ -28,6 +28,19 @@
 # Author: Hiranmoy Basak (hiranmoy.iitkgp@gmail.com)
 
 
+# code hierarchy:
+#
+# automata
+#		tcp
+#			utils2
+#				lirc
+#					appliance
+#						gpio
+#				sensor
+#						gpio
+#							util
+#								enums
+
 
 import shutil
 import sys
@@ -84,7 +97,7 @@ def KillPrevProcesses():
 def RestoreSettings():
 	# check for settings file
 	if (os.path.isfile(GetSettingsFile()) == 0):
-		print color.cCyan.value + "No settings file" + color.cEnd.value
+		DumpActivity("No settings file", color.cCyan)
 		return
 
 	pSettingsFile = open(GetSettingsFile(), "r")
@@ -105,40 +118,17 @@ def RestoreSettings():
 			# Disable Audio
 			SetDisableAudio(int(val))
 
-		elif (lineNum == 4):
-			# Enable Bluetooth
-			SetBluetooth(int(val))
-
-		elif (lineNum == 5):
-			# Switch on Fluorescent light
-			gFluLight.SetPoweredOn(int(val))
-
-		elif (lineNum == 6):
-			# Switch on Plug0
-			gPlug0.SetPoweredOn(int(val))
-
-		elif (lineNum == 7):
-			# Switch on Fan
-			gFan.SetPoweredOn(int(val))
-
-		elif (lineNum == 8):
-			# Switch on balcony light
-			gBalconyLight.SetPoweredOn(int(val))
-
-		elif (lineNum == 9):
-			# Switch on bulb0
-			gBulb0.SetPoweredOn(int(val))
-
-		elif (lineNum == 10):
-			# Switch on Plug1
-			gPlug1.SetPoweredOn(int(val))
+		#elif (lineNum == 4):
+		#	Enable Bluetooth
+		#	SetBluetooth(int(val))
 
 		else:
 			pSettingsFile.close()
-			print color.cRed.value + "Invalid settings file" + color.cEnd.value
+			DumpActivity("Invalid settings file", color.cRed)
 			return
 
 	pSettingsFile.close()
+
 
 
 # ============================== process arguments ============================
@@ -175,15 +165,19 @@ def ProcessArguments():
 				lightIdx = int(nextArg)
 				AddLightings(lightIdx)
 
-				# load previous power data
-				if (GetAddedLightings() == 1):
-					RestoreProfileOfAll()
-
-				continue
+			continue
 
 		# add lirc
 		if (arg == "-addLirc"):
-			AddLirc()
+			argIdx += 1
+
+			nextArg = sys.argv[argIdx]
+			argStr = argStr + " " + nextArg
+
+			if nextArg.isdigit():
+				lircIdx = int(nextArg)
+				AddLirc(lircIdx)
+
 			continue
 
 		# set debug mode
@@ -208,7 +202,7 @@ def ProcessArguments():
 			continue
 
 		# invalid argument
-		print color.cRed.value + "Invalid argument : " + arg + color.cEnd.value
+		DumpActivity("Invalid argument : " + arg, color.cRed)
 		return "-1"
 
 	return argStr
@@ -222,7 +216,9 @@ if (argStr == "-1"):
 
 
 # Starting ... intialization
+# GPIO setup
 SetupGPIOs()
+DumpActivity("GPIO setup done", color.cGreen)
 
 
 KillPrevProcesses()
@@ -232,11 +228,21 @@ KillPrevProcesses()
 RestoreSettings()
 
 
+# load previous power data
+RestorePowerOfAll()
+
+
 # dump area setup
 if (os.path.isdir(GetDumpArea())):
 	shutil.rmtree(GetDumpArea())
 
 os.makedirs(GetDumpArea())
+
+
+# create settings area if it doesn't exist
+if (os.path.isdir(GetSettingsArea()) == 0):
+	os.makedirs(GetSettingsArea())
+
 
 # move the previous activity file
 movedActivityLog = "/home/pi/activity.log"
@@ -259,12 +265,6 @@ pProcessFile.close()
 if (IsDebugMode() != 1):
 	command = "/home/pi/automation/crash_check.pl &"
 	os.system(command)
-
-
-# end streaming/video, audio recording
-EndStreaming(1)
-EndVideoRecording(1)
-EndAudioRecording(1)
 
 
 # enable touch sensor

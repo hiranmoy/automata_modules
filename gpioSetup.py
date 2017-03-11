@@ -98,7 +98,7 @@ def SetupGPIOs():
 		GPIO.setup(lightGPIO, GPIO.OUT)
 
 
-	if IsLircAdded():
+	if (GetAddedLirc() == 1):
 		# LED flood light
 		GPIO.setup(ledFloodGPIO, GPIO.OUT)
 
@@ -118,5 +118,5 @@ def ClearGPIO():
 	if (GetAddedLightings() == 2):
 		GPIO.output(lightGPIO, False)
 
-	if IsLircAdded():
+	if (GetAddedLirc() == 1):
 		GPIO.output(ledFloodGPIO, False)

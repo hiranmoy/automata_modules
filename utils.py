@@ -28,6 +28,12 @@
 # Author: Hiranmoy Basak (hiranmoy.iitkgp@gmail.com)
 
 
+import os
+
+from enums import *
+
+
+
 gAddMotionSensor = 0
 gAddCamera = 0
 gAddLightings = 0
@@ -38,8 +44,65 @@ gAddTouchSensor = 0
 gAddGasSensor = 0
 
 
+gSurvDir = "/home/backups/surveillance/motion_detection/"
+gRecDir = "/home/backups/surveillance/recordings/"
+gAutomataDir = "/home/pi/automation/"
+
+gDumpArea = "dump/"
+gSettingsArea = "settings/"
+
+gLogFile = "activity.log"
+gSettingsFile = "settings.ini"
+gPowerLog = "power.log"
+
+
+
 
 # ===================================	functions	================================
+def DumpActivity(dumpStr, colorCode):
+	print colorCode.value + dumpStr + color.cEnd.value
+
+	# check for log file
+	if (os.path.isfile(GetLogFile()) == 0):
+		return
+
+	pLogFile = open(GetLogFile(), "a")
+	pLogFile.write("%s\n" % dumpStr)
+	pLogFile.close()
+
+
+def GetSurvDir():
+	return gSurvDir
+
+
+def GetRecordDir():
+	return gRecDir
+
+
+def GetAutomataDir():
+	return gAutomataDir
+
+
+def GetDumpArea():
+	return (gAutomataDir + gDumpArea)
+
+
+def GetSettingsArea():
+	return (gAutomataDir + gSettingsArea)
+
+
+def GetPowerLogFile():
+	return (GetSettingsArea() + gPowerLog)
+
+
+def GetSettingsFile():
+	return (GetSettingsArea() + gSettingsFile)
+
+
+def GetLogFile():
+	return (GetDumpArea() + gLogFile)
+
+
 def AddMotionSensor(add=1):
 	global gAddMotionSensor
 	gAddMotionSensor = add
@@ -67,12 +130,12 @@ def GetAddedLightings():
 	return gAddLightings
 
 
-def AddLirc(add=1):
+def AddLirc(add):
 	global gAddLirc
 	gAddLirc = add
 
 
-def IsLircAdded():
+def GetAddedLirc():
 	return gAddLirc
 
 

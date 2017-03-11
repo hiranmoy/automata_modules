@@ -245,4 +245,7 @@ def Timer1Min():
 				gBulb0.UpdateSwitchedProfile()
 				gPlug1.UpdateSwitchedProfile()
 
-				SaveProfileOfAll()
+			if (GetAddedLirc() == 1):
+				gLEDFlood.UpdateSwitchedProfile()
+
+			SaveProfileOfAll()

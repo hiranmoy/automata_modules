@@ -29,7 +29,6 @@
 
 
 
-import os
 import time
 import datetime
 
@@ -37,10 +36,17 @@ from gpioSetup import *
 
 
 
-# ===================================	class	===================================
-class Appliance:
+gDataPointsPerDay = 24	# number of hours in one day
 
-	def __init__(self, gpio, name):
+
+
+# ================================	Appliance class	===============================
+class Appliance():
+	def __init__(self, idx, gpio, name):
+		# appliane id, for now multiple appliance can have same id
+		# -1 indicates special appliance like LIRC
+		self.mId = idx
+
 		# GPIO pin corresponding to this appliance
 		self.mGPIO = gpio
 
@@ -51,21 +57,26 @@ class Appliance:
 		self.mPoweredOn = 0
 
 		# initialize switched on info
-		self.mProfile = []
-		for idx in range(24):
-			self.mProfile.append(0)
+		self.mPower = []
+		for idx in range(gDataPointsPerDay):
+			self.mPower.append(0)
 
 
-	def SetPoweredOn(self, on=1):
-		if (GetAddedLightings() != 1):
-			return
-
+	def SetPoweredOnOnly(self, on=1):
 		self.mPoweredOn = on
 
 		if (self.mPoweredOn):
 			GPIO.output(self.mGPIO, True)
 		else:
 			GPIO.output(self.mGPIO, False)
+
+
+	# virtual
+	def SetPoweredOn(self, on=1):
+		if (GetAddedLightings() != self.mId):
+			return
+
+		self.SetPoweredOnOnly(on)
 
 
 	def CheckIfOn(self):
@@ -75,39 +86,61 @@ class Appliance:
 	def GetSwitchedOnProfile(self):
 		profileStr = ""
 
-		for idx in range(24):
+		for idx in range(gDataPointsPerDay):
 			if (idx > 0):
 				profileStr = profileStr + ","
 
-			profileStr = profileStr + str(self.mProfile[idx])
+			profileStr = profileStr + str(self.mPower[idx])
 
 		return profileStr
 
 
 	def UpdateSwitchedProfile(self):
-		if (GetAddedLightings() != 1):
+		if (GetAddedLightings() != self.mId and -1):
 			return
 
 		if self.mPoweredOn:
-			self.mProfile[datetime.datetime.now().hour] += 1
+			self.mPower[datetime.datetime.now().hour] += 1
 
 
-	def SaveProfle(self, pProfileFile):
-		pProfileFile.write("%20s : %s\n" % (self.mName, self.GetSwitchedOnProfile()))
+	def SaveProfileOnly(self, pProfileFile):
+		pProfileFile.write("%20s : %s : %s\n" % (self.mName, str(self.mPoweredOn), self.GetSwitchedOnProfile()))
 
 
-	def RestoreProfle(self, lineInput):
-		if (GetAddedLightings() != 1):
+	# virtual
+	def SaveProfile(self, pProfileFile):
+		if (GetAddedLightings() != self.mId):
+			pProfileFile.write("\n")
 			return
 
+		self.SaveProfileOnly(pProfileFile)
+
+
+	def RestoreProfileOnly(self, lineInput):
+		# remove first 23 characters
 		data = lineInput[23:]
+
+		# set power on status
+		self.mPoweredOn = int(data[0:1])
+		self.SetPoweredOn(self.mPoweredOn)
+
+		# remove 3 more characters
+		data = data[3:]
 
 		profileArr = data.split(',')
 		numHrs = profileArr.__len__()
 
-		if (numHrs != 24):
-			print color.cCyan.value + "Invalid power info for " + self.mName + color.cEnd.value
+		if (numHrs != gDataPointsPerDay):
+			DumpActivity("Invalid power info for " + self.mName, color.cRed)
 			return
 
-		for idx in range(24):
-			self.mProfile[idx] = int(profileArr[idx])
+		for idx in range(gDataPointsPerDay):
+			self.mPower[idx] = int(profileArr[idx])
+
+
+	# virtual
+	def RestoreProfile(self, lineInput):
+		if (GetAddedLightings() != self.mId):
+			return
+
+		self.RestoreProfileOnly(lineInput)

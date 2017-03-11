@@ -29,28 +29,22 @@
 
 
 
-from enums import *
-from appliance import *
+from lirc import *
 
 
-gDumpArea = "/home/pi/automation/dump/"
-gLogFile = "activity.log"
-gSettingsFile = "settings.ini"
-gSurvDir = "/home/backups/surveillance/motion_detection/"
-gRecDir = "/home/backups/surveillance/recordings/"
-gPowerLog = "/home/pi/automation/power.log"
 
 gEnableMotionSensor = 0
 gDisableVideo = 0
 gDisableAudio = 0
-gEnableBluetooth = 0
+#gEnableBluetooth = 0
 
-gFluLight = Appliance(fluLightGPIO, "fluLight")
-gPlug0 = Appliance(plug0GPIO, "plug0")
-gFan = Appliance(fanGPIO, "fan")
-gBalconyLight = Appliance(balconyLightGPIO, "balconyLight")
-gBulb0 = Appliance(bulb0GPIO, "bulb0")
-gPlug1 = Appliance(plug1GPIO, "plug1")
+gFluLight = Appliance(1, fluLightGPIO, "fluLight")
+gPlug0 = Appliance(1, plug0GPIO, "plug0")
+gFan = Appliance(1, fanGPIO, "fan")
+gBalconyLight = Appliance(1, balconyLightGPIO, "balconyLight")
+gBulb0 = Appliance(1, bulb0GPIO, "bulb0")
+gPlug1 = Appliance(1, plug1GPIO, "plug1")
+gLEDFlood = LEDFloodLight(1, ledFloodGPIO, "LED_flood_light")
 
 gPowerOnLED = 0
 gCameraOn = 0
@@ -67,22 +61,6 @@ def ExitThread(exit=1):
 
 def IsExitTread():
 	return gExit
-
-
-def GetSurvDir():
-	return gSurvDir
-
-
-def GetDumpArea():
-	return gDumpArea
-
-
-def GetLogFile():
-	return (gDumpArea + gLogFile)
-
-
-def GetSettingsFile():
-	return (gDumpArea + gSettingsFile)
 
 
 def GetTime():
@@ -129,15 +107,15 @@ def SetDisableAudio(val=1):
 	SaveSettings()
 
 
-def SetBluetooth(val):
-	global gEnableBluetooth
-	gEnableBluetooth = val
-	SaveSettings()
+#def SetBluetooth(val):
+#	global gEnableBluetooth
+#	gEnableBluetooth = val
+#	SaveSettings()
 
-	#if (gEnableBluetooth):
-	#	GPIO.output(bluetoothGPIO, True)
-	#else:
-	#	GPIO.output(bluetoothGPIO, False)
+#	if (gEnableBluetooth):
+#		GPIO.output(bluetoothGPIO, True)
+#	else:
+#		GPIO.output(bluetoothGPIO, False)
 
 
 def CurDateStr():
@@ -166,78 +144,67 @@ def CurDateTimeStr():
 	return curDateTimeStr
 
 
-def DumpActivity(dumpStr, colorCode):
-	pLogFile = open(GetLogFile(), "a")
-	print colorCode.value + dumpStr + color.cEnd.value
-	pLogFile.write("%s\n" % dumpStr)
-	pLogFile.close()
-
-
 def SaveSettings():
 	pSettingsFile = open(GetSettingsFile(), "w")
 
-	pSettingsFile.write(str(gEnableMotionSensor) + "    : Enable Motion Sensor\n")						# 1
-	pSettingsFile.write(str(gDisableVideo) + "    : Disable Video\n")													# 2
-	pSettingsFile.write(str(gDisableAudio) + "    : Disable Audio\n")													# 3
-	pSettingsFile.write(str(gEnableBluetooth) + "    : Enable Bluetooth\n")										# 4
-	pSettingsFile.write(str(gFluLight.CheckIfOn()) + "    : Switch on Fluorescent Light\n")		# 5
-	pSettingsFile.write(str(gPlug0.CheckIfOn()) + "    : Switch on Plug0\n")									# 6
-	pSettingsFile.write(str(gFan.CheckIfOn()) + "    : Switch on Fan\n")											# 7
-	pSettingsFile.write(str(gBalconyLight.CheckIfOn()) + "    : Switch on BalconyLight\n")		# 8
-	pSettingsFile.write(str(gBulb0.CheckIfOn()) + "    : Switch on Bulb0\n")									# 9
-	pSettingsFile.write(str(gPlug1.CheckIfOn()) + "    : Switch on Plug1\n")									# 10
+	pSettingsFile.write(str(gEnableMotionSensor) + "    : Enable Motion Sensor\n")			# 1
+	pSettingsFile.write(str(gDisableVideo) + "    : Disable Video\n")										# 2
+	pSettingsFile.write(str(gDisableAudio) + "    : Disable Audio\n")										# 3
+
+	#pSettingsFile.write(str(gEnableBluetooth) + "    : Enable Bluetooth\n")									
 
 	pSettingsFile.close()
 
 
 def SaveProfileOfAll():
-	if (GetAddedLightings() != 1):
-		return
+	pProfileFile = open(GetPowerLogFile(), "w")
 
-	pProfileFile = open(gPowerLog, "w")
-
-	gFluLight.SaveProfle(pProfileFile)						# 1
-	gPlug0.SaveProfle(pProfileFile)								# 2
-	gFan.SaveProfle(pProfileFile)									# 3
-	gBalconyLight.SaveProfle(pProfileFile)				# 4
-	gBulb0.SaveProfle(pProfileFile)								# 5
-	gPlug1.SaveProfle(pProfileFile)								# 6
+	gFluLight.SaveProfile(pProfileFile)							# 1
+	gPlug0.SaveProfile(pProfileFile)								# 2
+	gFan.SaveProfile(pProfileFile)									# 3
+	gBalconyLight.SaveProfile(pProfileFile)					# 4
+	gBulb0.SaveProfile(pProfileFile)								# 5
+	gPlug1.SaveProfile(pProfileFile)								# 6
+	gLEDFlood.SaveProfile(pProfileFile)							# 7
 
 	pProfileFile.close()
 
 
-def RestoreProfileOfAll():
-	if (GetAddedLightings() != 1):
-		return
-
+def RestorePowerOfAll():
 	# check for power log
-	if (os.path.isfile(gPowerLog) == 0):
-		print color.cCyan.value + "No power info" + color.cEnd.value
+	if (os.path.isfile(GetPowerLogFile()) == 0):
+		DumpActivity("No power info", color.cCyan)
 		return
 
-	pProfileFile = open(gPowerLog, "r")
+	pProfileFile = open(GetPowerLogFile(), "r")
 
 	lineNum = 0
 	for line in pProfileFile:
 		lineNum += 1
 
 		if (lineNum == 1):
-			gFluLight.RestoreProfle(line)
+			gFluLight.RestoreProfile(line)
 
 		if (lineNum == 2):
-			gPlug0.RestoreProfle(line)
+			gPlug0.RestoreProfile(line)
 
 		if (lineNum == 3):
-			gFan.RestoreProfle(line)
+			gFan.RestoreProfile(line)
 
 		if (lineNum == 4):
-			gBalconyLight.RestoreProfle(line)
+			gBalconyLight.RestoreProfile(line)
 
 		if (lineNum == 5):
-			gBulb0.RestoreProfle(line)
+			gBulb0.RestoreProfile(line)
 
 		if (lineNum == 6):
-			gPlug1.RestoreProfle(line)
+			gPlug1.RestoreProfile(line)
+
+		if (lineNum == 7):
+			gLEDFlood.RestoreProfile(line)
+
+			# press on "off" button (3) if switched on
+			gLEDFlood.SendIRSignal(gLEDFlood.GetLEDKEYs(3))
 
 	pProfileFile.close()
 
@@ -272,7 +239,6 @@ def CheckForGlitch(channel, high):
 			return False
 
 	# glitch out if the gpio state lasts less than 10 ms
-	#print "glitch at pin %d" % channel
 	return True
 
 
@@ -287,10 +253,10 @@ def TakeSnapshot():
 		return
 
 	# snapshot command
-	command = "raspistill -o " + gSurvDir + CurDateStr() + "/" + CurTimeStr() + ".jpg"
+	command = "raspistill -o " + GetSurvDir() + CurDateStr() + "/" + CurTimeStr() + ".jpg"
 	os.system(command)
 
-	print color.cYellow.value + "Snapshot taken" + color.cEnd.value
+	DumpActivity("Snapshot taken", color.cYellow)
 
 
 def TakeShortClip():
@@ -304,10 +270,10 @@ def TakeShortClip():
 		return
 
 	# command of taking 3 sec video clip
-	command = "raspivid -o " + gSurvDir + CurDateStr() + "/"  + CurTimeStr() + ".h264 -t 3000"
+	command = "raspivid -o " + GetSurvDir() + CurDateStr() + "/"  + CurTimeStr() + ".h264 -t 3000"
 	os.system(command)
 
-	print color.cYellow.value + "Short clip captured" + color.cEnd.value
+	DumpActivity("Short clip captured", color.cYellow)
 
 
 def RecordAudio():
@@ -322,7 +288,7 @@ def RecordAudio():
 
 	# command of recording 3 sec audio clip
 	command = "arecord -D hw:1,0 -r 48000 -d 3 -c 1 -f S16_LE " + \
-						gSurvDir + CurDateStr() + "/"  + CurTimeStr() + ".wav"
+						GetSurvDir() + CurDateStr() + "/"  + CurTimeStr() + ".wav"
 	os.system(command)
 
 
@@ -391,7 +357,7 @@ def StartVideoRecording():
 	gCameraOn = 1
 
 	curDateTime = datetime.datetime.now()
-	curRecDir = gRecDir + str(curDateTime.date())
+	curRecDir = GetRecordDir() + str(curDateTime.date())
 
 	# create current date directory if doesn't exist
 	if (os.path.isdir(curRecDir) == 0):
@@ -433,7 +399,7 @@ def StartAudioRecording():
 	gMicOn = 1
 
 	curDateTime = datetime.datetime.now()
-	curRecDir = gRecDir + str(curDateTime.date())
+	curRecDir = GetRecordDir() + str(curDateTime.date())
 
 	# create current date directory if doesn't exist
 	if (os.path.isdir(curRecDir) == 0):

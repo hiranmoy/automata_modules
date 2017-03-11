@@ -107,7 +107,7 @@ def StartSocket():
 		if (data == "Handshake"):
 			reply = "ok"
 
-		if (data == "IsConnected"):
+		elif (data == "IsConnected"):
 			reply = "connected"
 
 		elif (data == "Weather"):
@@ -200,18 +200,20 @@ def StartSocket():
 				reply = str(gPlug1.CheckIfOn())
 
 		elif (data == "SetupLEDFloodLight"):
-			if IsLircAdded():
-				SetupLEDLight()
+			if (GetAddedLirc() == 1):
+				gLEDFlood.SetupLEDFloodLight()
 				reply = "on"
 
 		elif (data == "SwitchOffLEDFloodLight"):
-			if IsLircAdded():
-				SetPowerLEDFloodLight(0)
+			if (GetAddedLirc() == 1):
+				gLEDFlood.SetupLEDFloodLight(0)
 				reply = "off"
 
 		elif (data[0:13] == "ClickOnButton"):
-			if IsLircAdded():
-				reply = ClickOnButton(int(data[14:16]))
+			if (GetAddedLirc() == 1):
+				ledKey = gLEDFlood.GetLEDKEYs(int(data[14:16]))
+				gLEDFlood.SendIRSignal(ledKey)
+				reply = "button " + data[14:16] + " pressed"
 
 		elif (data[0:18] == "EnableMotionDetect"):
 			if IsMotionSensorAdded():

@@ -29,109 +29,142 @@
 
 
 
-from utils2 import *
+from appliance import *
 
 
 
-gPowerOnLEDFloodLight = 0
-gLEDLightCfg = "/home/pi/automation/LED_flood_light.conf"
+# =================================	Lirc class	=================================
+class Lirc(Appliance):
+	def __init__(self, lircIdx, gpio, name):
+		# initalize Appliance class
+		Appliance.__init__(self, -1, gpio, name)
+
+		# lirc id
+		self.mLircId = lircIdx
+
+		# config file
+		self.mConfig = GetAutomataDir() + self.mName + ".conf"
+
+
+	# virtual
+	def SetPoweredOn(self, on=1):
+		if (GetAddedLirc() != self.mLircId):
+			return
+
+		self.SetPoweredOnOnly(on)
+
+
+	# virtual
+	def SaveProfile(self, pProfileFile):
+		if (GetAddedLirc() != self.mLircId):
+			pProfileFile.write("\n")
+			return
+
+		self.SaveProfileOnly(pProfileFile)
+
+
+	# virtual
+	def RestoreProfile(self, lineInput):
+		if (GetAddedLirc() != self.mLircId):
+			return
+
+		self.RestoreProfileOnly(lineInput)
+
+
+	def Setup(self, on):
+		self.SetPoweredOn(on)
+
+		if (on == 0):
+			return
+
+		command = "sudo cp " + self.mConfig + " /etc/lirc/lircd.conf; " + \
+							"sudo /etc/init.d/lirc restart; " + \
+							"sudo lircd -d /dev/lirc0"
+		os.system(command)
+
+		# wait for 1 sec
+		time.sleep(1)
+
+
+	def SendIRSignal(self, signalEnum):
+		command = "irsend SEND_ONCE LED " + signalEnum
+		os.system(command)
+		DumpActivity("LED key " + signalEnum + " pressed", color.cWhite)
 
 
 
-# ===================================	functions	================================
-def SetPowerLEDFloodLight(on=1):
-	global gPowerOnLEDFloodLight
 
-	if (IsLircAdded() != 1):
-		return
+# ===========================	LED Flood Light class	===========================
+class LEDFloodLight(Lirc):
+	def __init__(self, lircIdx, gpio, name):
+		# initalize Lirc class
+		Lirc.__init__(self, lircIdx, gpio, name)
+		
 
-	gPowerOnLEDFloodLight = on
+	def SetupLEDFloodLight(self, on=1):
+		# basic setup
+		self.Setup(on)
 
-	if on:
-		GPIO.output(ledFloodGPIO, True)
-	else:
-		GPIO.output(ledFloodGPIO, False)
+		# press on "off" button (3)
+		self.SendIRSignal(self.GetLEDKEYs(3))
 
-
-def SetupLEDLight():
-	command = "sudo cp " + gLEDLightCfg + " /etc/lirc/lircd.conf; " + \
-						"sudo /etc/init.d/lirc restart; " + \
-						"sudo lircd -d /dev/lirc0"
-	os.system(command)
-
-	SetPowerLEDFloodLight()
-
-	# wait for 1 sec
-	time.sleep(1)
-
-	# click on off button (3)
-	ClickOnButton(3)
-
-	DumpActivity("LED flood light setup done", color.cGreen)
+		DumpActivity("LED flood light setup done", color.cGreen)
 
 
-def ClickOnButton(button):
-	command = "irsend SEND_ONCE LED " + GetLEDKEYs(button)
-	os.system(command)
-	DumpActivity("LED key " + GetLEDKEYs(button) + " pressed", color.cWhite)
-
-	return "button " + str(button) + " pressed"
-
-
-# convert button index to button name
-def GetLEDKEYs(button):
-	# default on (ledButtons.c4)
-	ledButton = ledButtons.c4
-
-	if (button == 1):
-		ledButton = ledButtons.c1
-	elif (button == 2):
-		ledButton = ledButtons.c2
-	elif (button == 3):
-		ledButton = ledButtons.c3
-	elif (button == 4):
+	# convert button index to button name
+	def GetLEDKEYs(self, button):
+		# default on (ledButtons.c4)
 		ledButton = ledButtons.c4
-	elif (button == 5):
-		ledButton = ledButtons.c5
-	elif (button == 6):
-		ledButton = ledButtons.c6
-	elif (button == 7):
-		ledButton = ledButtons.c7
-	elif (button == 8):
-		ledButton = ledButtons.c8
-	elif (button == 9):
-		ledButton = ledButtons.c9
-	elif (button == 10):
-		ledButton = ledButtons.c10
-	elif (button == 11):
-		ledButton = ledButtons.c11
-	elif (button == 12):
-		ledButton = ledButtons.c12
-	elif (button == 13):
-		ledButton = ledButtons.c13
-	elif (button == 14):
-		ledButton = ledButtons.c14
-	elif (button == 15):
-		ledButton = ledButtons.c15
-	elif (button == 16):
-		ledButton = ledButtons.c16
-	elif (button == 17):
-		ledButton = ledButtons.c17
-	elif (button == 18):
-		ledButton = ledButtons.c18
-	elif (button == 19):
-		ledButton = ledButtons.c19
-	elif (button == 20):
-		ledButton = ledButtons.c20
-	elif (button == 21):
-		ledButton = ledButtons.c21
-	elif (button == 22):
-		ledButton = ledButtons.c22
-	elif (button == 23):
-		ledButton = ledButtons.c23
-	elif (button == 24):
-		ledButton = ledButtons.c24
-	else:
-		DumpActivity("incorrect LED button number, assuming default value", color.cRed)
 
-	return ledButton.value
+		if (button == 1):
+			ledButton = ledButtons.c1
+		elif (button == 2):
+			ledButton = ledButtons.c2
+		elif (button == 3):
+			ledButton = ledButtons.c3
+		elif (button == 4):
+			ledButton = ledButtons.c4
+		elif (button == 5):
+			ledButton = ledButtons.c5
+		elif (button == 6):
+			ledButton = ledButtons.c6
+		elif (button == 7):
+			ledButton = ledButtons.c7
+		elif (button == 8):
+			ledButton = ledButtons.c8
+		elif (button == 9):
+			ledButton = ledButtons.c9
+		elif (button == 10):
+			ledButton = ledButtons.c10
+		elif (button == 11):
+			ledButton = ledButtons.c11
+		elif (button == 12):
+			ledButton = ledButtons.c12
+		elif (button == 13):
+			ledButton = ledButtons.c13
+		elif (button == 14):
+			ledButton = ledButtons.c14
+		elif (button == 15):
+			ledButton = ledButtons.c15
+		elif (button == 16):
+			ledButton = ledButtons.c16
+		elif (button == 17):
+			ledButton = ledButtons.c17
+		elif (button == 18):
+			ledButton = ledButtons.c18
+		elif (button == 19):
+			ledButton = ledButtons.c19
+		elif (button == 20):
+			ledButton = ledButtons.c20
+		elif (button == 21):
+			ledButton = ledButtons.c21
+		elif (button == 22):
+			ledButton = ledButtons.c22
+		elif (button == 23):
+			ledButton = ledButtons.c23
+		elif (button == 24):
+			ledButton = ledButtons.c24
+		else:
+			DumpActivity("incorrect LED button number, assuming default value", color.cRed)
+
+		return ledButton.value

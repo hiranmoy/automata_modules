@@ -88,8 +88,8 @@ sub main
 		chomp $checkIfRunning;
 		if ($checkIfRunning ne "1")
 		{
-			# sleep for 1 sec
-			Time::HiRes::sleep(1);
+			# sleep for 3 sec
+			Time::HiRes::sleep(3);
 
 			print "process $processId may not be running\n";
 
