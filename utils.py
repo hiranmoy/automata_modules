@@ -29,10 +29,16 @@
 
 
 import os
+import time
+import datetime
 
 from enums import *
 
 
+
+gDisableVideo = 0
+gDisableAudio = 0
+#gEnableBluetooth = 0
 
 gAddMotionSensor = 0
 gAddCamera = 0
@@ -43,6 +49,9 @@ gAddSenseHat = 0
 gAddTouchSensor = 0
 gAddGasSensor = 0
 
+# checks whether camera/mic is busy
+gCameraOn = 0
+gMicOn = 0
 
 gSurvDir = "/home/backups/surveillance/motion_detection/"
 gRecDir = "/home/backups/surveillance/recordings/"
@@ -54,7 +63,6 @@ gSettingsArea = "settings/"
 gLogFile = "activity.log"
 gSettingsFile = "settings.ini"
 gPowerLog = "power.log"
-
 
 
 
@@ -101,6 +109,89 @@ def GetSettingsFile():
 
 def GetLogFile():
 	return (GetDumpArea() + gLogFile)
+
+
+def GetTime():
+	now = time.strftime("%H:%M:%S")
+	return now
+
+
+def SetCamBusy(busy=1):
+	global gCameraOn
+	gCameraOn = busy
+
+
+def IsCamBusy():
+	return gCameraOn
+
+
+def SetMicBusy(busy=1):
+	global gMicOn
+	gMicOn = busy
+
+
+def IsMicBusy():
+	return gMicOn
+
+
+def CurDateStr():
+	curDateTime = datetime.datetime.now()
+
+	curDateStr = str(curDateTime.date())
+	return curDateStr
+
+
+def CurTimeStr():
+	curDateTime = datetime.datetime.now()
+
+	curTimeStr = str(curDateTime.hour) + "-" + \
+							 str(curDateTime.minute) + "-" + \
+							 str(curDateTime.second)
+	return curTimeStr
+
+
+def CurDateTimeStr():
+	curDateTime = datetime.datetime.now()
+
+	curDateTimeStr = str(curDateTime.date()) + "-" + \
+									 str(curDateTime.hour) + "-" + \
+									 str(curDateTime.minute) + "-" + \
+									 str(curDateTime.second)
+	return curDateTimeStr
+
+
+def GetIsDisableVideo():
+	return gDisableVideo
+
+
+def SetDisableVideo(val=1):
+	if (IsCameraAdded() != 1):
+		return
+
+	global gDisableVideo
+	gDisableVideo = val
+
+
+def GetIsDisableAudio():
+	return gDisableAudio
+
+
+def SetDisableAudio(val=1):
+	if (IsCameraAdded() != 1):
+		return
+
+	global gDisableAudio
+	gDisableAudio= val
+
+
+#def SetBluetooth(val):
+#	global gEnableBluetooth
+#	gEnableBluetooth = val
+
+#	if (gEnableBluetooth):
+#		GPIO.output(bluetoothGPIO, True)
+#	else:
+#		GPIO.output(bluetoothGPIO, False)
 
 
 def AddMotionSensor(add=1):
@@ -157,12 +248,12 @@ def IsSenseHatAdded():
 	return gAddSenseHat
 
 
-def AddTouchSensor(add=1):
+def AddTouchSensor(add):
 	global gAddTouchSensor
 	gAddTouchSensor = add
 
 
-def IsTouchSensorAdded():
+def GetAddedTouchSensor():
 	return gAddTouchSensor
 
 

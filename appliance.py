@@ -28,10 +28,6 @@
 # Author: Hiranmoy Basak (hiranmoy.iitkgp@gmail.com)
 
 
-
-import time
-import datetime
-
 from gpioSetup import *
 
 

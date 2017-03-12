@@ -33,8 +33,7 @@ import commands
 import socket
 import threading
 
-from sensors import *
-from lirc import *
+from utils2 import *
 
 
 
@@ -120,14 +119,14 @@ def StartSocket():
 
 		elif (data == "ExtractMonitorStatus"):
 			if IsMotionSensorAdded():
-				temp = PopMonitorStatus()
-				reply = temp
+				reply = gMotionSensor.GetLastTriggeredTime()
+				gMotionSensor.ClearTriggeredStatus()
 
 		elif (data == "ExtractTouchSensorStatus"):
-			if IsTouchSensorAdded():
-				reply = str(IsTouchButtonPressed())
-				SetTouchButtonPressed(0)
-				
+			if (GetAddedTouchSensor() == 1):
+				reply = str(gTouchSensor.GetLastTriggeredTime())
+				gTouchSensor.ClearTriggeredStatus()
+
 		elif (data == "ToggleLED"):
 			if (GetAddedLightings() == 2):
 				ToggleLED()
@@ -165,7 +164,7 @@ def StartSocket():
 
 		elif (data == "GetIsEnableMotionDetect"):
 			if IsMotionSensorAdded():
-				reply = str(GetIsEnableMotionSensor())
+				reply = str(gMotionSensor.IsEnabled())
 
 		elif (data == "GetIsDisableVideo"):
 			if IsCameraAdded():
@@ -217,8 +216,9 @@ def StartSocket():
 
 		elif (data[0:18] == "EnableMotionDetect"):
 			if IsMotionSensorAdded():
-				EnableMotionSensor(int(data[19:20]))
-				reply = str(GetIsEnableMotionSensor())
+				gMotionSensor.EnableSensor(int(data[19:20]))
+				reply = str(gMotionSensor.IsEnabled())
+				SaveSettings()
 
 		elif (data[0:12] == "DisableVideo"):
 			if IsCameraAdded():

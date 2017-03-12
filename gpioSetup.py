@@ -59,7 +59,7 @@ def SetupGPIOs():
 		GPIO.setup(motionGPIO, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 
-	if IsTouchSensorAdded():
+	if (GetAddedTouchSensor() == 1):
 		# Touch sensor input (active high)
 		GPIO.setup(touchGPIO, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 

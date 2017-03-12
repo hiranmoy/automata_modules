@@ -28,7 +28,6 @@
 # Author: Hiranmoy Basak (hiranmoy.iitkgp@gmail.com)
 
 
-
 import thread
 
 from sense_hat import SenseHat
@@ -37,116 +36,210 @@ from sense_hat import SenseHat
 #in A/D in the PCF8591P @ address 0x48
 from smbus import SMBus
 
-from utils2 import *
+from gpioSetup import *
 
 
 
-gTouchButtonPressed = 0
-gMonitorStatus = "-"
+# ================	digital GPIO rising edge triggered class	==================
+class DigitalSensor():
+	def __init__(self, gpio, name):
+		# GPIO pin corresponding to this sensor
+		self.mGPIO = gpio
+
+		# set name
+		self.mName = name
+
+		# stores whether the sensor is enabled
+		self.mEnabled = 0
+
+		# stores when sensor was triggered last time
+		self.mLastTriggeredTime = "-"
+
+
+	def IsEnabled(self):
+		return self.mEnabled
+
+
+	def CheckForGlitch(self, channel, high):
+		gpioState = GPIO.HIGH if high else GPIO.LOW
+
+		# count number of msec
+		time_ms = 0
+		while (GPIO.input(channel) == gpioState):
+			time.sleep(0.001)
+			time_ms += 1
+			if (time_ms >= 10):
+				return False
+
+		# glitch out if the gpio state lasts less than 10 ms
+		return True
+
+
+	# virtual
+	def ClearTriggeredStatus(self):
+		self.mLastTriggeredTime = "-"
+
+
+	#virtual
+	def GetLastTriggeredTime(self):
+		return self.mLastTriggeredTime
+
+
+	#virtual
+	def SensorTriggered(self, channel):
+		if self.CheckForGlitch(channel, 1):
+			return
+
+		self.mLastTriggeredTime = GetTime()
+		DumpActivity(self.mName + " sensor triggered ", color.cRed)
+
+
+	#virtual
+	def EnableSensor(self, enable=1):
+		if (enable == 1):
+			GPIO.add_event_detect(self.mGPIO, GPIO.RISING, callback=self.SensorTriggered)
+			DumpActivity(self.mName + " enabled at " + GetTime(), color.cCyan)
+		else:
+			GPIO.remove_event_detect(self.mGPIO)
+			DumpActivity(self.mName + " disabled at " + GetTime(), color.cPink)
+
+		self.mEnabled = enable
 
 
 
-# =============================	touch sensor	==================================
-def SetTouchButtonPressed(pressed=1):
-	if (IsTouchSensorAdded() != 1):
-		return
+# ===========================	touch sensor class	===============================
+class TouchSensor(DigitalSensor):
+	def __init__(self, idx, gpio, name):
+		# initalize DigitalSensor class
+		DigitalSensor.__init__(self, gpio, name)
 
-	global gTouchButtonPressed
-	gTouchButtonPressed = pressed
-
-
-def IsTouchButtonPressed():
-	if (IsTouchSensorAdded() != 1):
-		return 0
-
-	return gTouchButtonPressed
+		# touch sensor id
+		self.mId = idx
 
 
-def button_pressed(channel):
-	if (IsTouchSensorAdded() != 1):
-		return
+	#virtual
+	def EnableSensor(self, enable=1):
+		if (GetAddedTouchSensor() != self.mId):
+			return
 
-	if CheckForGlitch(channel, 1):
-		return
-
-	status = "Touch button pressed at " + GetTime()
-	DumpActivity(status, color.cGreen)
-
-	SetTouchButtonPressed()
+		DigitalSensor.EnableSensor(self, enable)
 
 
-def EnableTouchSensor():
-	if (IsTouchSensorAdded() != 1):
-		return
+	#virtual
+	def SensorTriggered(self, channel):
+		if (GetAddedTouchSensor() != self.mId):
+			return
 
-	GPIO.add_event_detect(touchGPIO, GPIO.RISING, callback=button_pressed)
-	DumpActivity("Touch button enabled at " + GetTime(), color.cYellow)
-
-
-
-# =============================	motion sensor	==================================
-def SetMonitorStatus(status):
-	if (IsMotionSensorAdded() != 1):
-		return
-
-	global gMonitorStatus
-	gMonitorStatus = status
+		DigitalSensor.SensorTriggered(self, channel)
 
 
-def PopMonitorStatus():
-	if (IsMotionSensorAdded() != 1):
-		return ""
+	# virtual
+	def ClearTriggeredStatus(self):
+		if (GetAddedTouchSensor() != self.mId):
+			return
 
-	status = gMonitorStatus
-	SetMonitorStatus("-")
-
-	return status
+		DigitalSensor.ClearTriggeredStatus(self)
 
 
-def motion_detected(channel):
-	if (IsMotionSensorAdded() != 1):
-		return
+	#virtual
+	def GetLastTriggeredTime(self):
+		if (GetAddedTouchSensor() != self.mId):
+			return ""
 
-	if CheckForGlitch(channel, 1):
-		return
-
-	status = "Motion Detected at " + GetTime()
-	SetMonitorStatus(status)
-	DumpActivity(status, color.cRed)
-
-	MotionDetectionEffects()
+		return DigitalSensor.GetLastTriggeredTime(self)
 
 
-def EnableMotionSensor(enable=1):
-	if (IsMotionSensorAdded() != 1):
-		return
-
-	if (enable == 1):
-		GPIO.add_event_detect(motionGPIO, GPIO.RISING, callback=motion_detected)
-		DumpActivity("Motion detection enabled at " + GetTime(), color.cCyan)
-	else:
-		GPIO.remove_event_detect(motionGPIO)
-		DumpActivity("Motion detection disabled at " + GetTime(), color.cPink)
-
-	SetEnableMotionSensor(enable)
 
 
-def MotionDetectionEffects():
-	if (IsMotionSensorAdded() != 1):
-		return
+# ===========================	motion sensor class	==================================
+class MotionSensor(DigitalSensor):
+	def __init__(self, gpio, name):
+		# initalize DigitalSensor class
+		DigitalSensor.__init__(self, gpio, name)
 
-	curDateTime = datetime.datetime.now()
-	curSurvDir = GetSurvDir() + str(curDateTime.date())
 
-	# create current date directory if doesn't exist
-	if (os.path.isdir(curSurvDir) == 0):
-		os.makedirs(curSurvDir)
+	#virtual
+	def EnableSensor(self, enable=1):
+		if (IsMotionSensorAdded() != 1):
+			return
 
-	#thread.start_new_thread(TakeSnapshot, ())	# 6 sec
-	thread.start_new_thread(TakeShortClip, ())	# 3 sec
-	thread.start_new_thread(RecordAudio, ())	# 3 sec
+		DigitalSensor.EnableSensor(self, enable)
 
-	time.sleep(17)
+
+	#virtual
+	def SensorTriggered(self, channel):
+		if (IsMotionSensorAdded() != 1):
+			return
+
+		DigitalSensor.SensorTriggered(self, channel)
+		self.MotionDetectionEffects()
+
+
+	# virtual
+	def ClearTriggeredStatus(self):
+		if (IsMotionSensorAdded() != 1):
+			return
+
+		DigitalSensor.ClearTriggeredStatus(self)
+
+
+	#virtual
+	def GetLastTriggeredTime(self):
+		if (IsMotionSensorAdded() != 1):
+			return ""
+
+		return DigitalSensor.GetLastTriggeredTime(self)
+
+
+	def MotionDetectionEffects(self):
+		if (IsMotionSensorAdded() != 1):
+			return
+
+		curDateTime = datetime.datetime.now()
+		curSurvDir = GetSurvDir() + str(curDateTime.date())
+
+		# create current date directory if doesn't exist
+		if (os.path.isdir(curSurvDir) == 0):
+			os.makedirs(curSurvDir)
+
+		#thread.start_new_thread(TakeSnapshot, ())						# 6 sec
+		thread.start_new_thread(self.TakeShortClip, ())				# 3 sec
+		thread.start_new_thread(self.RecordShortAudio, ())		# 3 sec
+
+		time.sleep(17)
+
+
+	def TakeShortClip(self):
+		if (IsCameraAdded() != 1):
+			return
+
+		if (GetIsDisableVideo() == 1):
+			return
+
+		if IsCamBusy():
+			return
+
+		# command of taking 3 sec video clip
+		command = "raspivid -o " + GetSurvDir() + CurDateStr() + "/"  + CurTimeStr() + ".h264 -t 3000"
+		os.system(command)
+
+		DumpActivity("Short clip captured", color.cYellow)
+
+
+	def RecordShortAudio(self):
+		if (IsCameraAdded() != 1):
+			return
+
+		if (GetIsDisableAudio() == 1):
+			return
+
+		if IsMicBusy():
+			return
+
+		# command of recording 3 sec audio clip
+		command = "arecord -D hw:1,0 -r 48000 -d 3 -c 1 -f S16_LE " + \
+							GetSurvDir() + CurDateStr() + "/"  + CurTimeStr() + ".wav"
+		os.system(command)
 
 
 
@@ -216,36 +309,3 @@ def GetSmokeReading():
 	bus.write_byte(0x48, 1) # set control register to read channel 1
 	reading = bus.read_byte(0x48) # read A/D
 	return str(reading)
-
-
-
-# ===================================	timer	===================================
-def Timer1Min():
-	timeInSec = 0
-
-	while(1):
-		if gExit:
-			break
-
-		time.sleep(1)
-		timeInSec += 1
-
-		if (timeInSec == 60):
-			timeInSec = 0
-
-			if IsTouchSensorAdded():
-				# unset touch button pressed status
-				SetTouchButtonPressed(0)
-
-			if (GetAddedLightings() == 1):
-				gFluLight.UpdateSwitchedProfile()
-				gPlug0.UpdateSwitchedProfile()
-				gFan.UpdateSwitchedProfile()
-				gBalconyLight.UpdateSwitchedProfile()
-				gBulb0.UpdateSwitchedProfile()
-				gPlug1.UpdateSwitchedProfile()
-
-			if (GetAddedLirc() == 1):
-				gLEDFlood.UpdateSwitchedProfile()
-
-			SaveProfileOfAll()

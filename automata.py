@@ -108,7 +108,7 @@ def RestoreSettings():
 
 		if (lineNum == 1):
 			# Enable Motion Detection
-			EnableMotionSensor(int(val))
+			gMotionSensor.EnableSensor(int(val))
 
 		elif (lineNum == 2):
 			# Disable Video
@@ -193,7 +193,18 @@ def ProcessArguments():
 
 		# add touch sensor
 		if (arg == "-addTouchSensor"):
-			AddTouchSensor()
+			argIdx += 1
+
+			nextArg = sys.argv[argIdx]
+			argStr = argStr + " " + nextArg
+
+			if nextArg.isdigit():
+				touchIdx = int(nextArg)
+				AddTouchSensor(touchIdx)
+
+				# enable touch sensor
+				gTouchSensor.EnableSensor()
+
 			continue
 
 		# add gas sensor
@@ -265,10 +276,6 @@ pProcessFile.close()
 if (IsDebugMode() != 1):
 	command = "/home/pi/automation/crash_check.pl &"
 	os.system(command)
-
-
-# enable touch sensor
-EnableTouchSensor()
 
 
 # start tcp monitor thread

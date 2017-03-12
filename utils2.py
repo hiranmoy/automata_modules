@@ -30,13 +30,9 @@
 
 
 from lirc import *
+from sensors import *
 
 
-
-gEnableMotionSensor = 0
-gDisableVideo = 0
-gDisableAudio = 0
-#gEnableBluetooth = 0
 
 gFluLight = Appliance(1, fluLightGPIO, "fluLight")
 gPlug0 = Appliance(1, plug0GPIO, "plug0")
@@ -46,11 +42,12 @@ gBulb0 = Appliance(1, bulb0GPIO, "bulb0")
 gPlug1 = Appliance(1, plug1GPIO, "plug1")
 gLEDFlood = LEDFloodLight(1, ledFloodGPIO, "LED_flood_light")
 
-gPowerOnLED = 0
-gCameraOn = 0
-gMicOn = 0
-gExit = 0
+gTouchSensor = TouchSensor(1, touchGPIO, "Touch_sensor")
+gMotionSensor = MotionSensor(motionGPIO, "Motion_sensor")
 
+gPowerOnLED = 0
+
+gExit = 0
 
 
 # ===================================	functions	================================
@@ -63,94 +60,12 @@ def IsExitTread():
 	return gExit
 
 
-def GetTime():
-	now = time.strftime("%H:%M:%S")
-	return now
-
-
-def GetIsEnableMotionSensor():
-	return gEnableMotionSensor
-
-
-def SetEnableMotionSensor(val=1):
-	if (IsMotionSensorAdded() != 1):
-		return
-
-	global gEnableMotionSensor
-	gEnableMotionSensor = val
-	SaveSettings()
-
-
-def GetIsDisableVideo():
-	return gDisableVideo
-
-
-def SetDisableVideo(val=1):
-	if (IsCameraAdded() != 1):
-		return
-
-	global gDisableVideo
-	gDisableVideo = val
-	SaveSettings()
-
-
-def GetIsDisableAudio():
-	return gDisableAudio
-
-
-def SetDisableAudio(val=1):
-	if (IsCameraAdded() != 1):
-		return
-
-	global gDisableAudio
-	gDisableAudio= val
-	SaveSettings()
-
-
-#def SetBluetooth(val):
-#	global gEnableBluetooth
-#	gEnableBluetooth = val
-#	SaveSettings()
-
-#	if (gEnableBluetooth):
-#		GPIO.output(bluetoothGPIO, True)
-#	else:
-#		GPIO.output(bluetoothGPIO, False)
-
-
-def CurDateStr():
-	curDateTime = datetime.datetime.now()
-
-	curDateStr = str(curDateTime.date())
-	return curDateStr
-
-
-def CurTimeStr():
-	curDateTime = datetime.datetime.now()
-
-	curTimeStr = str(curDateTime.hour) + "-" + \
-							 str(curDateTime.minute) + "-" + \
-							 str(curDateTime.second)
-	return curTimeStr
-
-
-def CurDateTimeStr():
-	curDateTime = datetime.datetime.now()
-
-	curDateTimeStr = str(curDateTime.date()) + "-" + \
-									 str(curDateTime.hour) + "-" + \
-									 str(curDateTime.minute) + "-" + \
-									 str(curDateTime.second)
-	return curDateTimeStr
-
-
 def SaveSettings():
 	pSettingsFile = open(GetSettingsFile(), "w")
 
-	pSettingsFile.write(str(gEnableMotionSensor) + "    : Enable Motion Sensor\n")			# 1
-	pSettingsFile.write(str(gDisableVideo) + "    : Disable Video\n")										# 2
-	pSettingsFile.write(str(gDisableAudio) + "    : Disable Audio\n")										# 3
-
+	pSettingsFile.write(str(gMotionSensor.IsEnabled()) + "    : Enable Motion Sensor\n")			# 1
+	pSettingsFile.write(str(GetIsDisableVideo()) + "    : Disable Video\n")													# 2
+	pSettingsFile.write(str(GetIsDisableAudio()) + "    : Disable Audio\n")													# 3
 	#pSettingsFile.write(str(gEnableBluetooth) + "    : Enable Bluetooth\n")									
 
 	pSettingsFile.close()
@@ -227,21 +142,6 @@ def SetPowerLED(on=1):
 		GPIO.output(lightGPIO, False)
 
 
-def CheckForGlitch(channel, high):
-	gpioState = GPIO.HIGH if high else GPIO.LOW
-
-	# count number of msec
-	time_ms = 0
-	while (GPIO.input(channel) == gpioState):
-		time.sleep(0.001)
-		time_ms += 1
-		if (time_ms >= 10):
-			return False
-
-	# glitch out if the gpio state lasts less than 10 ms
-	return True
-
-
 def TakeSnapshot():
 	if (IsCameraAdded() != 1):
 		return
@@ -249,7 +149,7 @@ def TakeSnapshot():
 	if (GetIsDisableVideo() == 1):
 		return
 
-	if (gCameraOn == 1):
+	if IsCamBusy():
 		return
 
 	# snapshot command
@@ -257,39 +157,6 @@ def TakeSnapshot():
 	os.system(command)
 
 	DumpActivity("Snapshot taken", color.cYellow)
-
-
-def TakeShortClip():
-	if (IsCameraAdded() != 1):
-		return
-
-	if (GetIsDisableVideo() == 1):
-		return
-
-	if (gCameraOn == 1):
-		return
-
-	# command of taking 3 sec video clip
-	command = "raspivid -o " + GetSurvDir() + CurDateStr() + "/"  + CurTimeStr() + ".h264 -t 3000"
-	os.system(command)
-
-	DumpActivity("Short clip captured", color.cYellow)
-
-
-def RecordAudio():
-	if (IsCameraAdded() != 1):
-		return
-
-	if (GetIsDisableAudio() == 1):
-		return
-
-	if (gMicOn == 1):
-		return
-
-	# command of recording 3 sec audio clip
-	command = "arecord -D hw:1,0 -r 48000 -d 3 -c 1 -f S16_LE " + \
-						GetSurvDir() + CurDateStr() + "/"  + CurTimeStr() + ".wav"
-	os.system(command)
 
 
 # toggle LED light
@@ -307,10 +174,9 @@ def StartStreaming():
 	if (GetIsDisableVideo() == 1):
 		return
 
-	global gCameraOn
-	if (gCameraOn == 1):
+	if IsCamBusy():
 		return
-	gCameraOn = 1
+	SetCamBusy()
 
 	# camera on command
 	command = "/home/pi/automation/cam_on.sh &"
@@ -328,10 +194,9 @@ def EndStreaming(forced=0):
 	if ((forced == 0) & (GetIsDisableVideo() == 1)):
 		return
 
-	global gCameraOn
-	if ((forced == 0) & (gCameraOn == 0)):
+	if ((forced == 0) & (IsCamBusy() == 0)):
 		return
-	gCameraOn = 0
+	SetCamBusy(0)
 
 	# kill camera on script
 	if (os.path.isfile(GetDumpArea() + "cam_on_script.process")):
@@ -351,10 +216,9 @@ def StartVideoRecording():
 	if (GetIsDisableVideo() == 1):
 		return
 
-	global gCameraOn
-	if (gCameraOn == 1):
+	if IsCamBusy():
 		return
-	gCameraOn = 1
+	SetCamBusy()
 
 	curDateTime = datetime.datetime.now()
 	curRecDir = GetRecordDir() + str(curDateTime.date())
@@ -375,10 +239,9 @@ def EndVideoRecording(forced=0):
 	if ((forced == 0) & (GetIsDisableVideo() == 1)):
 		return
 
-	global gCameraOn
-	if ((forced == 0) & (gCameraOn == 0)):
+	if ((forced == 0) & (IsCamBusy() == 0)):
 		return
-	gCameraOn = 0
+	SetCamBusy(0)
 
 	# kill camera on script
 	if (os.path.isfile(GetDumpArea() + "video_rec_on_script.process")):
@@ -393,10 +256,9 @@ def StartAudioRecording():
 	if (GetIsDisableAudio() == 1):
 		return
 
-	global gMicOn
-	if (gMicOn == 1):
+	if IsMicBusy():
 		return
-	gMicOn = 1
+	SetMicBusy()
 
 	curDateTime = datetime.datetime.now()
 	curRecDir = GetRecordDir() + str(curDateTime.date())
@@ -417,12 +279,46 @@ def EndAudioRecording(forced=0):
 	if ((forced == 0) & (GetIsDisableAudio() == 1)):
 		return
 
-	global gMicOn
-	if ((forced == 0) & (gMicOn == 0)):
+	if ((forced == 0) & (IsMicBusy() == 0)):
 		return
-	gMicOn = 0
+	SetMicBusy(0)
 
 	# kill camera on script
 	if (os.path.isfile(GetDumpArea() + "audio_rec_on_script.process")):
 		command = "kill -2 `cat " + GetDumpArea() + "audio_rec_on_script.process`"
 		os.system(command)
+
+
+
+# ===================================	timer	===================================
+def Timer1Min():
+	timeInSec = 0
+
+	while(1):
+		if gExit:
+			break
+
+		time.sleep(1)
+		timeInSec += 1
+
+		if (timeInSec % 10 == 9):
+			SaveSettings()
+
+		if (timeInSec == 60):
+			timeInSec = 0
+
+			# unset touch sensor pressed status
+			gTouchSensor.ClearTriggeredStatus()
+
+			if (GetAddedLightings() == 1):
+				gFluLight.UpdateSwitchedProfile()
+				gPlug0.UpdateSwitchedProfile()
+				gFan.UpdateSwitchedProfile()
+				gBalconyLight.UpdateSwitchedProfile()
+				gBulb0.UpdateSwitchedProfile()
+				gPlug1.UpdateSwitchedProfile()
+
+			if (GetAddedLirc() == 1):
+				gLEDFlood.UpdateSwitchedProfile()
+
+			SaveProfileOfAll()
