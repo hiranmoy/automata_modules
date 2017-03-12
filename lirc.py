@@ -72,6 +72,9 @@ class Lirc(Appliance):
 
 
 	def Setup(self, on):
+		if (GetAddedLirc() != self.mLircId):
+			return
+
 		self.SetPoweredOn(on)
 
 		if (on == 0):
@@ -87,6 +90,9 @@ class Lirc(Appliance):
 
 
 	def SendIRSignal(self, signalEnum):
+		if (GetAddedLirc() != self.mLircId):
+			return
+
 		command = "irsend SEND_ONCE LED " + signalEnum
 		os.system(command)
 		DumpActivity("LED key " + signalEnum + " pressed", color.cWhite)
@@ -102,6 +108,9 @@ class LEDFloodLight(Lirc):
 		
 
 	def SetupLEDFloodLight(self, on=1):
+		if (GetAddedLirc() != self.mLircId):
+			return
+
 		# basic setup
 		self.Setup(on)
 
