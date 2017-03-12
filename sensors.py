@@ -279,10 +279,12 @@ class AnalogSensor():
 		self.mReading[minute] = reading
 
 
+	# virtual
 	def SaveReadings(self, pProfileFile):
 		pProfileFile.write("%20s : %s\n" % (self.mName, self.GetReadings()))
 
 
+	# virtual
 	def RestoreReadings(self, lineInput):
 		# remove first 23 characters
 		data = lineInput[23:]
@@ -318,7 +320,7 @@ class Weather():
 		curTemperature = self.mTemperature.GetReading(curMinute)
 
 		# temperature already set
-		if curTemperature:
+		if (curTemperature > 0):
 			return curTemperature
 
 		self.SetTemperature()
@@ -348,7 +350,7 @@ class Weather():
 		curHumidity = self.mHumidity.GetReading(curMinute)
 
 		# humidity already set
-		if curHumidity:
+		if (curHumidity > 0):
 			return curHumidity
 
 		self.SetHumidity()
@@ -378,7 +380,7 @@ class Weather():
 		curPressure = self.mPressure.GetReading(curMinute)
 
 		# pressure already set
-		if curPressure:
+		if (curPressure > 0):
 			return curPressure
 
 		self.SetPressure()
@@ -409,16 +411,22 @@ class Weather():
 		self.SetPressure()
 
 
+	# virtual
 	def SaveReadings(self, pProfileFile):
 		if (IsSenseHatAdded() != 1):
 			pProfileFile.write("\n\n\n")
+			return
 
 		self.mTemperature.SaveReadings(pProfileFile)
 		self.mHumidity.SaveReadings(pProfileFile)
 		self.mPressure.SaveReadings(pProfileFile)
 
 
+	# virtual
 	def RestoreReadings(self, idx, lineInput):
+		if (IsSenseHatAdded() != 1):
+			return
+
 		if (idx == 1):
 			self.mTemperature.RestoreReadings(lineInput)
 		if (idx == 2):
@@ -428,32 +436,159 @@ class Weather():
 
 
 
-# ==============================	gas sensor	==================================
-def GetAlcoholReading():
-	if (IsGasSensorAdded() != 1):
-		return ""
-
-	bus = SMBus(1)
-	bus.write_byte(0x48, 3) # set control register to read channel 3
-	reading = bus.read_byte(0x48) # read A/D
-	return str(reading)
+# ============================	AlcoholSensor class ===============================
+class AlcoholSensor(AnalogSensor):
+	def __init__(self, name):
+		# initalize AnalogSensor class
+		AnalogSensor.__init__(self, name)
 
 
-def GetCOReading():
-	if (IsGasSensorAdded() != 1):
-		return ""
+	def GetAlcoholReading(self):
+		if (IsGasSensorAdded() != 1):
+			return ""
 
-	bus = SMBus(1)
-	bus.write_byte(0x48, 2) # set control register to read channel 2
-	reading = bus.read_byte(0x48) # read A/D
-	return str(reading)
+		curMinute = datetime.datetime.now().minute
+		curAlcoholReading = self.GetReading(curMinute)
+
+		# alcohol reading already set
+		if (curAlcoholReading > 0):
+			return int(curAlcoholReading)
+
+		self.SetAlcoholReading()
+		return int(self.GetReading(curMinute))
 
 
-def GetSmokeReading():
-	if (IsGasSensorAdded() != 1):
-		return ""
+	def SetAlcoholReading(self):
+		if (IsGasSensorAdded() != 1):
+			return
 
-	bus = SMBus(1)
-	bus.write_byte(0x48, 1) # set control register to read channel 1
-	reading = bus.read_byte(0x48) # read A/D
-	return str(reading)
+		# calculate alcohol content
+		bus = SMBus(1)
+		bus.write_byte(0x48, 3) # set control register to read channel 3
+		curAlcoholReading = bus.read_byte(0x48) # read A/D
+
+		# update alcohol reading
+		AlcoholSensor.SetReadings(self, datetime.datetime.now().minute, float(curAlcoholReading))
+
+
+	# virtual
+	def SaveReadings(self, pProfileFile):
+		if (IsGasSensorAdded() != 1):
+			pProfileFile.write("\n")
+			return
+
+		AnalogSensor.SaveReadings(self, pProfileFile)
+
+
+	# virtual
+	def RestoreReadings(self, lineInput):
+		if (IsGasSensorAdded() != 1):
+			return
+
+		AnalogSensor.RestoreReadings(self, lineInput)
+
+
+
+# ============================	COSensor class ===============================
+class COSensor(AnalogSensor):
+	def __init__(self, name):
+		# initalize AnalogSensor class
+		AnalogSensor.__init__(self, name)
+
+
+	def GetCOReading(self):
+		if (IsGasSensorAdded() != 1):
+			return ""
+
+		curMinute = datetime.datetime.now().minute
+		curCOReading = self.GetReading(curMinute)
+
+		# CO reading already set
+		if (curCOReading > 0):
+			return int(curCOReading)
+
+		self.SetCOReading()
+		return int(self.GetReading(curMinute))
+
+
+	def SetCOReading(self):
+		if (IsGasSensorAdded() != 1):
+			return
+
+		# calculate alcohol content
+		bus = SMBus(1)
+		bus.write_byte(0x48, 2) # set control register to read channel 2
+		curCOReading = bus.read_byte(0x48) # read A/D
+
+		# update alcohol reading
+		AnalogSensor.SetReadings(self, datetime.datetime.now().minute, float(curCOReading))
+
+
+	# virtual
+	def SaveReadings(self, pProfileFile):
+		if (IsGasSensorAdded() != 1):
+			pProfileFile.write("\n")
+			return
+
+		AnalogSensor.SaveReadings(self, pProfileFile)
+
+
+	# virtual
+	def RestoreReadings(self, lineInput):
+		if (IsGasSensorAdded() != 1):
+			return
+
+		AnalogSensor.RestoreReadings(self, lineInput)
+
+
+
+# ============================	SmokeSensor class ===============================
+class SmokeSensor(AnalogSensor):
+	def __init__(self, name):
+		# initalize AnalogSensor class
+		AnalogSensor.__init__(self, name)
+
+
+	def GetSmokeReading(self):
+		if (IsGasSensorAdded() != 1):
+			return ""
+
+		curMinute = datetime.datetime.now().minute
+		curSmokeReading = self.GetReading(curMinute)
+
+		# smoke reading already set
+		if (curSmokeReading > 0):
+			return int(curSmokeReading)
+
+		self.SetSmokeReading()
+		return int(self.GetReading(curMinute))
+
+
+	def SetSmokeReading(self):
+		if (IsGasSensorAdded() != 1):
+			return
+
+		# calculate alcohol content
+		bus = SMBus(1)
+		bus.write_byte(0x48, 1) # set control register to read channel 1
+		curSmokeReading = bus.read_byte(0x48) # read A/D
+
+		# update alcohol reading
+		AnalogSensor.SetReadings(self, datetime.datetime.now().minute, float(curSmokeReading))
+
+
+	# virtual
+	def SaveReadings(self, pProfileFile):
+		if (IsGasSensorAdded() != 1):
+			pProfileFile.write("\n")
+			return
+
+		AnalogSensor.SaveReadings(self, pProfileFile)
+
+
+	# virtual
+	def RestoreReadings(self, lineInput):
+		if (IsGasSensorAdded() != 1):
+			return
+
+		AnalogSensor.RestoreReadings(self, lineInput)

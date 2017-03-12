@@ -117,7 +117,9 @@ def StartSocket():
 
 		elif (data == "AirQuality"):
 			if IsGasSensorAdded():
-				reply = GetAlcoholReading() + "," + GetCOReading() + "," + GetSmokeReading()
+				reply = str(gAlcoholSensor.GetAlcoholReading()) + "," + \
+								str(gCOSensor.GetCOReading()) + "," + \
+								str(gSmokeSensor.GetSmokeReading())
 
 		elif (data == "ExtractMonitorStatus"):
 			if IsMotionSensorAdded():

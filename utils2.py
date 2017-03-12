@@ -47,6 +47,10 @@ gMotionSensor = MotionSensor(motionGPIO, "Motion_sensor")
 
 gWeather = Weather("Weather")
 
+gAlcoholSensor = AlcoholSensor("Alcohol_sensor")
+gCOSensor = COSensor("CO_sensor")
+gSmokeSensor = SmokeSensor("Smoke_sensor")
+
 gPowerOnLED = 0
 
 gExit = 0
@@ -90,6 +94,9 @@ def SaveProfileOfAll():
 	pProfileFile = open(GetSensorLogFile(), "w")
 
 	gWeather.SaveReadings(pProfileFile)							# 1-3
+	gAlcoholSensor.SaveReadings(pProfileFile)				# 4
+	gCOSensor.SaveReadings(pProfileFile)						# 5
+	gSmokeSensor.SaveReadings(pProfileFile)					# 6
 
 	pProfileFile.close()
 
@@ -146,6 +153,15 @@ def RestoreProfileOfAll():
 
 		if (lineNum < 4):
 			gWeather.RestoreReadings(lineNum, line)
+
+		if (lineNum == 4):
+			gAlcoholSensor.RestoreReadings(line)
+
+		if (lineNum == 5):
+			gCOSensor.RestoreReadings(line)
+
+		if (lineNum == 6):
+			gSmokeSensor.RestoreReadings(line)
 
 	pProfileFile.close()
 
