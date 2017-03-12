@@ -1,0 +1,11 @@
+# python exe
+*.pyc
+
+# temp vim files
+*.swp
+
+# text files
+*.txt
+
+# log files
+*.log
