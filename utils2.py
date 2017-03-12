@@ -45,6 +45,8 @@ gLEDFlood = LEDFloodLight(1, ledFloodGPIO, "LED_flood_light")
 gTouchSensor = TouchSensor(1, touchGPIO, "Touch_sensor")
 gMotionSensor = MotionSensor(motionGPIO, "Motion_sensor")
 
+gWeather = Weather("Weather")
+
 gPowerOnLED = 0
 
 gExit = 0
@@ -85,7 +87,14 @@ def SaveProfileOfAll():
 	pProfileFile.close()
 
 
-def RestorePowerOfAll():
+	pProfileFile = open(GetSensorLogFile(), "w")
+
+	gWeather.SaveReadings(pProfileFile)							# 1-3
+
+	pProfileFile.close()
+
+
+def RestoreProfileOfAll():
 	# check for power log
 	if (os.path.isfile(GetPowerLogFile()) == 0):
 		DumpActivity("No power info", color.cCyan)
@@ -120,6 +129,23 @@ def RestorePowerOfAll():
 
 			# press on "off" button (3) if switched on
 			gLEDFlood.SendIRSignal(gLEDFlood.GetLEDKEYs(3))
+
+	pProfileFile.close()
+
+
+	# check for sensor log
+	if (os.path.isfile(GetSensorLogFile()) == 0):
+		DumpActivity("No sensor info", color.cCyan)
+		return
+
+	pProfileFile = open(GetSensorLogFile(), "r")
+
+	lineNum = 0
+	for line in pProfileFile:
+		lineNum += 1
+
+		if (lineNum < 4):
+			gWeather.RestoreReadings(lineNum, line)
 
 	pProfileFile.close()
 
@@ -320,5 +346,8 @@ def Timer1Min():
 
 			if (GetAddedLirc() == 1):
 				gLEDFlood.UpdateSwitchedProfile()
+
+			if IsSenseHatAdded():
+				gWeather.UpdateReadings()
 
 			SaveProfileOfAll()

@@ -63,6 +63,7 @@ gSettingsArea = "settings/"
 gLogFile = "activity.log"
 gSettingsFile = "settings.ini"
 gPowerLog = "power.log"
+gSensorLog = "sensor.log"
 
 
 
@@ -101,6 +102,10 @@ def GetSettingsArea():
 
 def GetPowerLogFile():
 	return (GetSettingsArea() + gPowerLog)
+
+
+def GetSensorLogFile():
+	return (GetSettingsArea() + gSensorLog)
 
 
 def GetSettingsFile():
