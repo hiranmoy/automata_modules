@@ -202,9 +202,6 @@ def ProcessArguments():
 				touchIdx = int(nextArg)
 				AddTouchSensor(touchIdx)
 
-				# enable touch sensor
-				gTouchSensor.EnableSensor()
-
 			continue
 
 		# add gas sensor
@@ -230,6 +227,10 @@ if (argStr == "-1"):
 # GPIO setup
 SetupGPIOs()
 DumpActivity("GPIO setup done", color.cGreen)
+
+
+# enable touch sensor
+gTouchSensor.EnableSensor()
 
 
 KillPrevProcesses()
