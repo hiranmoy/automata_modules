@@ -111,7 +111,7 @@ def StartSocket():
 
 		elif (data == "Weather"):
 			if IsSenseHatAdded():
-				reply = GetTemperature() + "," + GetHumidity() + "," + GetPressure()
+				reply = gWeather.GetTemperature() + "," + gWeather.GetHumidity() + "," + gWeather.GetPressure()
 
 		elif (data == "AirQuality"):
 			if IsGasSensorAdded():

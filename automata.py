@@ -188,7 +188,11 @@ def ProcessArguments():
 		# add senseHat
 		if (arg == "-addSenseHat"):
 			AddSenseHat()
-			ClearSenseHat()
+
+			# clear senseHat
+			sense = SenseHat()
+			sense.clear()
+
 			continue
 
 		# add touch sensor
@@ -239,8 +243,8 @@ KillPrevProcesses()
 RestoreSettings()
 
 
-# load previous power data
-RestorePowerOfAll()
+# load previous profile
+RestoreProfileOfAll()
 
 
 # dump area setup

@@ -40,6 +40,10 @@ from gpioSetup import *
 
 
 
+gDataPointsPerDay = 1024	# number of minutes in one day
+
+
+
 # ================	digital GPIO rising edge triggered class	==================
 class DigitalSensor():
 	def __init__(self, gpio, name):
@@ -243,40 +247,184 @@ class MotionSensor(DigitalSensor):
 
 
 
-# ==================== temperature, humidity, air pressure sensor	==============
-def ClearSenseHat():
-	if (IsSenseHatAdded() != 1):
-		return
+# ============================ analog sensor class	============================
+class AnalogSensor():
+	def __init__(self, name):
+		# set name
+		self.mName = name
 
-	sense = SenseHat()
-	sense.clear()
-
-
-def GetTemperature():
-	if (IsSenseHatAdded() != 1):
-		return ""
-
-	sense = SenseHat()
-	temperature = str(sense.get_temperature())
-	return temperature[0:5]
+		# stores sensor data
+		self.mReading = []
+		for idx in range(gDataPointsPerDay):
+			self.mReading.append(0.0)
 
 
-def GetHumidity():
-	if (IsSenseHatAdded() != 1):
-		return ""
+	def GetReadings(self):
+		profileStr = ""
 
-	sense = SenseHat()
-	humidity = str(sense.get_humidity())
-	return humidity[0:5]
+		for idx in range(gDataPointsPerDay):
+			if (idx > 0):
+				profileStr = profileStr + ","
+
+			profileStr = profileStr + str(self.mReading[idx])
+
+		return profileStr
 
 
-def GetPressure():
-	if (IsSenseHatAdded() != 1):
-		return ""
+	def GetReading(self, minute):
+		return self.mReading[minute]
 
-	sense = SenseHat()
-	pressure = str(sense.get_pressure())
-	return pressure[0:6]
+
+	def SetReadings(self, minute, reading):
+		self.mReading[minute] = reading
+
+
+	def SaveReadings(self, pProfileFile):
+		pProfileFile.write("%20s : %s\n" % (self.mName, self.GetReadings()))
+
+
+	def RestoreReadings(self, lineInput):
+		# remove first 23 characters
+		data = lineInput[23:]
+
+		profileArr = data.split(',')
+		numMins = profileArr.__len__()
+
+		if (numMins != gDataPointsPerDay):
+			DumpActivity("Invalid sensor reading for " + self.mName, color.cRed)
+			return
+
+		for idx in range(gDataPointsPerDay):
+			self.mReading[idx] = float(profileArr[idx])
+
+
+
+# ================================== weather class	============================
+class Weather():
+	def __init__(self, name):
+		# set name
+		self.mName = name
+
+		self.mTemperature = AnalogSensor("Temperature")
+		self.mHumidity = AnalogSensor("Humidity")
+		self.mPressure = AnalogSensor("Pressure")
+
+
+	def GetTemperature(self):
+		if (IsSenseHatAdded() != 1):
+			return ""
+
+		curMinute = datetime.datetime.now().minute
+		curTemperature = self.mTemperature.GetReading(curMinute)
+
+		# temperature already set
+		if curTemperature:
+			return curTemperature
+
+		self.SetTemperature()
+		return self.mTemperature.GetReading(curMinute)
+
+
+	def SetTemperature(self):
+		if (IsSenseHatAdded() != 1):
+			return
+
+		# calculate temperature
+		sense = SenseHat()
+		curTemperature = str(sense.get_temperature())
+
+		# take only first 5 digits
+		curTemperature = curTemperature[0:5]
+
+		# update temperature
+		self.mTemperature.SetReadings(datetime.datetime.now().minute, curTemperature)
+
+
+	def GetHumidity(self):
+		if (IsSenseHatAdded() != 1):
+			return ""
+
+		curMinute = datetime.datetime.now().minute
+		curHumidity = self.mHumidity.GetReading(curMinute)
+
+		# humidity already set
+		if curHumidity:
+			return curHumidity
+
+		self.SetHumidity()
+		return self.mHumidity.GetReading(curMinute)
+
+
+	def SetHumidity(self):
+		if (IsSenseHatAdded() != 1):
+			return
+
+		# calculate humidity
+		sense = SenseHat()
+		curHumidity = str(sense.get_humidity())
+
+		# take only first 5 digits
+		curHumidity = curHumidity[0:5]
+
+		# update humidity
+		self.mHumidity.SetReadings(datetime.datetime.now().minute, curHumidity)
+
+
+	def GetPressure(self):
+		if (IsSenseHatAdded() != 1):
+			return ""
+
+		curMinute = datetime.datetime.now().minute
+		curPressure = self.mPressure.GetReading(curMinute)
+
+		# pressure already set
+		if curPressure:
+			return curPressure
+
+		self.SetPressure()
+		return self.mPressure.GetReading(curMinute)
+
+
+	def SetPressure(self):
+		if (IsSenseHatAdded() != 1):
+			return
+
+		# calculate pressure
+		sense = SenseHat()
+		curPressure = str(sense.get_pressure())
+
+		# take only first 6 digits
+		curPressure = curPressure[0:6]
+
+		# update pressure
+		self.mPressure.SetReadings(datetime.datetime.now().minute, curPressure)
+
+
+	def UpdateReadings(self):
+		if (IsSenseHatAdded() != 1):
+			return
+
+		self.SetTemperature()
+		self.SetHumidity()
+		self.SetPressure()
+
+
+	def SaveReadings(self, pProfileFile):
+		if (IsSenseHatAdded() != 1):
+			pProfileFile.write("\n\n\n")
+
+		self.mTemperature.SaveReadings(pProfileFile)
+		self.mHumidity.SaveReadings(pProfileFile)
+		self.mPressure.SaveReadings(pProfileFile)
+
+
+	def RestoreReadings(self, idx, lineInput):
+		if (idx == 1):
+			self.mTemperature.RestoreReadings(lineInput)
+		if (idx == 2):
+			self.mHumidity.RestoreReadings(lineInput)
+		if (idx == 3):
+			self.mPressure.RestoreReadings(lineInput)
 
 
 
