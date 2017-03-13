@@ -227,6 +227,16 @@ if (argStr == "-1"):
 	sys.exit()
 
 
+KillPrevProcesses()
+
+
+# dump area setup
+if (os.path.isdir(GetDumpArea())):
+	shutil.rmtree(GetDumpArea())
+
+os.makedirs(GetDumpArea())
+
+
 # Starting ... intialization
 # GPIO setup
 SetupGPIOs()
@@ -237,22 +247,12 @@ DumpActivity("GPIO setup done", color.cGreen)
 gTouchSensor.EnableSensor()
 
 
-KillPrevProcesses()
-
-
 # load previous settings
 RestoreSettings()
 
 
 # load previous profile
 RestoreProfileOfAll()
-
-
-# dump area setup
-if (os.path.isdir(GetDumpArea())):
-	shutil.rmtree(GetDumpArea())
-
-os.makedirs(GetDumpArea())
 
 
 # create settings area if it doesn't exist

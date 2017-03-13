@@ -72,7 +72,7 @@ def DumpActivity(dumpStr, colorCode):
 	print colorCode.value + dumpStr + color.cEnd.value
 
 	# check for log file
-	if (os.path.isfile(GetLogFile()) == 0):
+	if (os.path.isdir(GetDumpArea()) == 0):
 		return
 
 	pLogFile = open(GetLogFile(), "a")
