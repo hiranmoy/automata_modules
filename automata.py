@@ -227,6 +227,12 @@ if (argStr == "-1"):
 	sys.exit()
 
 
+# Starting ... intialization
+# GPIO setup
+SetupGPIOs()
+DumpActivity("GPIO setup done", color.cGreen)
+
+
 KillPrevProcesses()
 
 
@@ -235,12 +241,6 @@ if (os.path.isdir(GetDumpArea())):
 	shutil.rmtree(GetDumpArea())
 
 os.makedirs(GetDumpArea())
-
-
-# Starting ... intialization
-# GPIO setup
-SetupGPIOs()
-DumpActivity("GPIO setup done", color.cGreen)
 
 
 # enable touch sensor
