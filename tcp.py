@@ -93,7 +93,7 @@ def StartSocket():
 	# awaiting for message
 	while True:
 		try:
-			data = conn.recv(1024)
+			tcpData = conn.recv(1024)
 		except:
 			DumpActivity("Connection interrupted", color.cRed)
 			break
@@ -101,6 +101,18 @@ def StartSocket():
 		reply = "Unknown command"
 
 		gDataReceived = 1
+
+		# split tcpData into key and data based '#' char
+		# tcpData = <key>#<data>
+		dataArr = tcpData.split('#')
+		numData = dataArr.__len__()
+		key = ""
+		data = ""
+		if (numData != 2):
+			DumpActivity("Incorrect tcp data format : " + tcpData, color.cRed)
+		else:
+			key = dataArr[0]
+			data = dataArr[1]
 
 		# return some data w.r.t a message
 		if (data == "Handshake"):
@@ -297,14 +309,15 @@ def StartSocket():
 
 		# quit
 		elif (data == "quit"):
-			conn.send("Terminating")
+			conn.send(key + "#Terminating")
 			quit = 1
 			break
 
 
 		try:
-			conn.send(reply)
-			DumpActivity("Message: " + reply + " sent back in response to: " + data + " at " + CurDateTimeStr(), color.cCyan)
+			# tcp reply = <key>#<reply>
+			conn.send(key + "#" + reply)
+			DumpActivity("Message: " + reply + " sent back in response to: " + tcpData + " at " + CurDateTimeStr(), color.cCyan)
 		except:
 			DumpActivity("Connection interrupted", color.cRed)
 			break
