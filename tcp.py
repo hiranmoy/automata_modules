@@ -309,14 +309,14 @@ def StartSocket():
 
 		# quit
 		elif (data == "quit"):
-			conn.send(key + "#Terminating")
+			conn.send(key + "#Terminating#")
 			quit = 1
 			break
 
 
 		try:
-			# tcp reply = <key>#<reply>
-			conn.send(key + "#" + reply)
+			# tcp reply = <key>#<reply>#
+			conn.send(key + "#" + reply + "#")
 			DumpActivity("Message: " + reply + " sent back in response to: " + tcpData + " at " + CurDateTimeStr(), color.cCyan)
 		except:
 			DumpActivity("Connection interrupted", color.cRed)
