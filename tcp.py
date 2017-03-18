@@ -93,14 +93,14 @@ def StartSocket():
 	# awaiting for message
 	while True:
 		try:
-			tcpData = conn.recv(1024)
+			tcpData = conn.recv(16384)
 		except:
 			DumpActivity("Connection interrupted", color.cRed)
 			break
  
-		reply = "Unknown command"
-
 		gDataReceived = 1
+
+		tcpReply = ""
 
 		# split tcpData into key and data based '#' char
 		# tcpData = <key>#<data>
@@ -108,216 +108,30 @@ def StartSocket():
 		numData = dataArr.__len__()
 		key = ""
 		data = ""
-		if (numData != 2):
+		if (((numData % 2) != 1) or (numData < 3)):
 			DumpActivity("Incorrect tcp data format : " + tcpData, color.cRed)
 		else:
-			key = dataArr[0]
-			data = dataArr[1]
+			for idx in range(0, (numData - 2), 2):
+				key = dataArr[idx]
+				data = dataArr[idx + 1]
 
-		# return some data w.r.t a message
-		if (data == "Handshake"):
-			reply = "ok"
+				# quit
+				if (data == "quit"):
+					conn.send(key + "#Terminating#")
+					quit = 1
+					break
 
-		elif (data == "IsConnected"):
-			reply = "connected"
+				reply = GetTcpReply(data)
+				# tcp reply = <key>#<reply>#
+				tcpReply = key + "#" + reply + "#"
 
-		elif (data == "Weather"):
-			if IsSenseHatAdded():
-				reply = str(gWeather.GetTemperature()) + "," + \
-								str(gWeather.GetHumidity()) + "," + \
-								str(gWeather.GetPressure())
-
-		elif (data == "AirQuality"):
-			if IsGasSensorAdded():
-				reply = str(gAlcoholSensor.GetAlcoholReading()) + "," + \
-								str(gCOSensor.GetCOReading()) + "," + \
-								str(gSmokeSensor.GetSmokeReading())
-
-		elif (data == "ExtractMonitorStatus"):
-			if IsMotionSensorAdded():
-				reply = gMotionSensor.GetLastTriggeredTime()
-				gMotionSensor.ClearTriggeredStatus()
-
-		elif (data == "ExtractTouchSensorStatus"):
-			if (GetAddedTouchSensor() == 1):
-				reply = str(gTouchSensor.GetLastTriggeredTime())
-				gTouchSensor.ClearTriggeredStatus()
-
-		elif (data == "ToggleLED"):
-			if (GetAddedLightings() == 2):
-				ToggleLED()
-				reply = str(GetPowerOnLED())
-
-		elif (data == "StartLiveFeed"):
-			if IsCameraAdded():
-				StartStreaming()
-				reply = "on"
-
-		elif (data == "StopLiveFeed"):
-			if IsCameraAdded():
-				EndStreaming()
-				reply = "off"
-
-		elif (data == "StartVideoRec"):
-			if IsCameraAdded():
-				StartVideoRecording()
-				reply = "on"
-
-		elif (data == "StopVideoRec"):
-			if IsCameraAdded():
-				EndVideoRecording()
-				reply = "off"
-
-		elif (data == "StartAudioRec"):
-			if IsCameraAdded():
-				StartAudioRecording()
-				reply = "on"
-
-		elif (data == "StopAudioRec"):
-			if IsCameraAdded():
-				EndAudioRecording()
-				reply = "off"
-
-		elif (data == "GetIsEnableMotionDetect"):
-			if IsMotionSensorAdded():
-				reply = str(gMotionSensor.IsEnabled())
-
-		elif (data == "GetIsDisableVideo"):
-			if IsCameraAdded():
-				reply = str(GetIsDisableVideo())
-
-		elif (data == "GetIsDisableAudio"):
-			if IsCameraAdded():
-				reply = str(GetIsDisableAudio())
-
-		elif (data == "CheckIfOnFluLight"):
-			if (GetAddedLightings() == 1):
-				reply = str(gFluLight.CheckIfOn())
-
-		elif (data == "CheckIfOnPlug0"):
-			if (GetAddedLightings() == 1):
-				reply = str(gPlug0.CheckIfOn())
-
-		elif (data == "CheckIfOnFan"):
-			if (GetAddedLightings() == 1):
-				reply = str(gFan.CheckIfOn())
-
-		elif (data == "CheckIfOnBalconyLight"):
-			if (GetAddedLightings() == 1):
-				reply = str(gBalconyLight.CheckIfOn())
-
-		elif (data == "CheckIfOnBulb0"):
-			if (GetAddedLightings() == 1):
-				reply = str(gBulb0.CheckIfOn())
-
-		elif (data == "CheckIfOnPlug1"):
-			if (GetAddedLightings() == 1):
-				reply = str(gPlug1.CheckIfOn())
-
-		elif (data == "SetupLEDFloodLight"):
-			if (GetAddedLirc() == 1):
-				gLEDFlood.SetupLEDFloodLight()
-				reply = "on"
-
-		elif (data == "SwitchOffLEDFloodLight"):
-			if (GetAddedLirc() == 1):
-				gLEDFlood.SetupLEDFloodLight(0)
-				reply = "off"
-
-		elif (data[0:13] == "ClickOnButton"):
-			if (GetAddedLirc() == 1):
-				ledKey = gLEDFlood.GetLEDKEYs(int(data[14:16]))
-				gLEDFlood.SendIRSignal(ledKey)
-				reply = "button " + data[14:16] + " pressed"
-
-		elif (data[0:18] == "EnableMotionDetect"):
-			if IsMotionSensorAdded():
-				gMotionSensor.EnableSensor(int(data[19:20]))
-				reply = str(gMotionSensor.IsEnabled())
-				SaveSettings()
-
-		elif (data[0:12] == "DisableVideo"):
-			if IsCameraAdded():
-				SetDisableVideo(int(data[13:14]))
-				reply = str(GetIsDisableVideo())
-
-		elif (data[0:12] == "DisableAudio"):
-			if IsCameraAdded():
-				SetDisableAudio(int(data[13:14]))
-				reply = str(GetIsDisableAudio())
-
-		elif (data[0:10] == "PowerOnFan"):
-			if (GetAddedLightings() == 1):
-				gFan.SetPoweredOn(int(data[11:12]))
-				reply = str(gFan.CheckIfOn())
-				SaveSettings()
-
-		elif (data[0:15] == "PowerOnFluLight"):
-			if (GetAddedLightings() == 1):
-				gFluLight.SetPoweredOn(int(data[16:17]))
-				reply = str(gFluLight.CheckIfOn())
-				SaveSettings()
-
-		elif (data[0:12] == "PowerOnPlug0"):
-			if (GetAddedLightings() == 1):
-				gPlug0.SetPoweredOn(int(data[13:14]))
-				reply = str(gPlug0.CheckIfOn())
-				SaveSettings()
-
-		elif (data[0:19] == "PowerOnBalconyLight"):
-			if (GetAddedLightings() == 1):
-				gBalconyLight.SetPoweredOn(int(data[20:21]))
-				reply = str(gBalconyLight.CheckIfOn())
-				SaveSettings()
-
-		elif (data[0:12] == "PowerOnBulb0"):
-			if (GetAddedLightings() == 1):
-				gBulb0.SetPoweredOn(int(data[13:14]))
-				reply = str(gBulb0.CheckIfOn())
-				SaveSettings()
-
-		elif (data[0:12] == "PowerOnPlug1"):
-			if (GetAddedLightings() == 1):
-				gPlug1.SetPoweredOn(int(data[13:14]))
-				reply = str(gPlug1.CheckIfOn())
-				SaveSettings()
-
-		elif (data == "GetFluLightProfile"):
-			if (GetAddedLightings() == 1):
-				reply = gFluLight.GetSwitchedOnProfile()
-
-		elif (data == "GetPlug0Profile"):
-			if (GetAddedLightings() == 1):
-				reply = gPlug0.GetSwitchedOnProfile()
-
-		elif (data == "GetBalconyLightProfile"):
-			if (GetAddedLightings() == 1):
-				reply = gBalconyLight.GetSwitchedOnProfile()
-
-		elif (data == "GetFanProfile"):
-			if (GetAddedLightings() == 1):
-				reply = gFan.GetSwitchedOnProfile()
-
-		elif (data == "GetPlug1Profile"):
-			if (GetAddedLightings() == 1):
-				reply = gPlug1.GetSwitchedOnProfile()
-
-		elif (data == "GetBulb0Profile"):
-			if (GetAddedLightings() == 1):
-				reply = gBulb0.GetSwitchedOnProfile()
-
-
-		# quit
-		elif (data == "quit"):
-			conn.send(key + "#Terminating#")
-			quit = 1
+		# break from tcp while loop
+		if quit:
 			break
 
-
 		try:
-			# tcp reply = <key>#<reply>#
-			conn.send(key + "#" + reply + "#")
-			DumpActivity("Message: " + reply + " sent back in response to: " + tcpData + " at " + CurDateTimeStr(), color.cCyan)
+			conn.send(tcpReply)
+			DumpActivity("Message: " + tcpReply[:80] + " sent back in response to: " + tcpData + " at " + CurDateTimeStr(), color.cCyan)
 		except:
 			DumpActivity("Connection interrupted", color.cRed)
 			break
@@ -332,6 +146,217 @@ def StartSocket():
 		return 0
 
 	return 1
+
+
+def GetTcpReply(data):
+	reply = "Unknown command"
+
+	# return some data w.r.t a message
+
+	if (data == "Handshake"):
+		reply = "ok"
+
+	elif (data == "IsConnected"):
+		reply = "connected"
+
+	elif (data == "Weather"):
+		if IsSenseHatAdded():
+			reply = str(gWeather.GetTemperature()) + "," + \
+							str(gWeather.GetHumidity()) + "," + \
+							str(gWeather.GetPressure())
+
+	elif (data == "AirQuality"):
+		if IsGasSensorAdded():
+			reply = str(gAlcoholSensor.GetAlcoholReading()) + "," + \
+							str(gCOSensor.GetCOReading()) + "," + \
+							str(gSmokeSensor.GetSmokeReading())
+
+	elif (data == "GetTemperatureProfile"):
+		if IsSenseHatAdded():
+			reply = gWeather.GetTemperatureReadings()
+
+	elif (data == "GetHumidityProfile"):
+		if IsSenseHatAdded():
+			reply = gWeather.GetHumidityReadings()
+
+	elif (data == "GetPressureProfile"):
+		if IsSenseHatAdded():
+			reply = gWeather.GetPressureReadings()
+
+	elif (data == "ExtractMonitorStatus"):
+		if IsMotionSensorAdded():
+			reply = gMotionSensor.GetLastTriggeredTime()
+			gMotionSensor.ClearTriggeredStatus()
+
+	elif (data == "ExtractTouchSensorStatus"):
+		if (GetAddedTouchSensor() == 1):
+			reply = str(gTouchSensor.GetLastTriggeredTime())
+			gTouchSensor.ClearTriggeredStatus()
+
+	elif (data == "ToggleLED"):
+		if (GetAddedLightings() == 2):
+			ToggleLED()
+			reply = str(GetPowerOnLED())
+
+	elif (data == "StartLiveFeed"):
+		if IsCameraAdded():
+			StartStreaming()
+			reply = "on"
+
+	elif (data == "StopLiveFeed"):
+		if IsCameraAdded():
+			EndStreaming()
+			reply = "off"
+
+	elif (data == "StartVideoRec"):
+		if IsCameraAdded():
+			StartVideoRecording()
+			reply = "on"
+
+	elif (data == "StopVideoRec"):
+		if IsCameraAdded():
+			EndVideoRecording()
+			reply = "off"
+
+	elif (data == "StartAudioRec"):
+		if IsCameraAdded():
+			StartAudioRecording()
+			reply = "on"
+
+	elif (data == "StopAudioRec"):
+		if IsCameraAdded():
+			EndAudioRecording()
+			reply = "off"
+
+	elif (data == "GetIsEnableMotionDetect"):
+		if IsMotionSensorAdded():
+			reply = str(gMotionSensor.IsEnabled())
+
+	elif (data == "GetIsDisableVideo"):
+		if IsCameraAdded():
+			reply = str(GetIsDisableVideo())
+
+	elif (data == "GetIsDisableAudio"):
+		if IsCameraAdded():
+			reply = str(GetIsDisableAudio())
+
+	elif (data == "CheckIfOnFluLight"):
+		if (GetAddedLightings() == 1):
+			reply = str(gFluLight.CheckIfOn())
+
+	elif (data == "CheckIfOnPlug0"):
+		if (GetAddedLightings() == 1):
+			reply = str(gPlug0.CheckIfOn())
+
+	elif (data == "CheckIfOnFan"):
+		if (GetAddedLightings() == 1):
+			reply = str(gFan.CheckIfOn())
+
+	elif (data == "CheckIfOnBalconyLight"):
+		if (GetAddedLightings() == 1):
+			reply = str(gBalconyLight.CheckIfOn())
+
+	elif (data == "CheckIfOnBulb0"):
+		if (GetAddedLightings() == 1):
+			reply = str(gBulb0.CheckIfOn())
+
+	elif (data == "CheckIfOnPlug1"):
+		if (GetAddedLightings() == 1):
+			reply = str(gPlug1.CheckIfOn())
+
+	elif (data == "SetupLEDFloodLight"):
+		if (GetAddedLirc() == 1):
+			gLEDFlood.SetupLEDFloodLight()
+			reply = "on"
+
+	elif (data == "SwitchOffLEDFloodLight"):
+		if (GetAddedLirc() == 1):
+			gLEDFlood.SetupLEDFloodLight(0)
+			reply = "off"
+
+	elif (data[0:13] == "ClickOnButton"):
+		if (GetAddedLirc() == 1):
+			ledKey = gLEDFlood.GetLEDKEYs(int(data[14:16]))
+			gLEDFlood.SendIRSignal(ledKey)
+			reply = "button " + data[14:16] + " pressed"
+
+	elif (data[0:18] == "EnableMotionDetect"):
+		if IsMotionSensorAdded():
+			gMotionSensor.EnableSensor(int(data[19:20]))
+			reply = str(gMotionSensor.IsEnabled())
+			SaveSettings()
+
+	elif (data[0:12] == "DisableVideo"):
+		if IsCameraAdded():
+			SetDisableVideo(int(data[13:14]))
+			reply = str(GetIsDisableVideo())
+
+	elif (data[0:12] == "DisableAudio"):
+		if IsCameraAdded():
+			SetDisableAudio(int(data[13:14]))
+			reply = str(GetIsDisableAudio())
+
+	elif (data[0:10] == "PowerOnFan"):
+		if (GetAddedLightings() == 1):
+			gFan.SetPoweredOn(int(data[11:12]))
+			reply = str(gFan.CheckIfOn())
+			SaveSettings()
+
+	elif (data[0:15] == "PowerOnFluLight"):
+		if (GetAddedLightings() == 1):
+			gFluLight.SetPoweredOn(int(data[16:17]))
+			reply = str(gFluLight.CheckIfOn())
+			SaveSettings()
+
+	elif (data[0:12] == "PowerOnPlug0"):
+		if (GetAddedLightings() == 1):
+			gPlug0.SetPoweredOn(int(data[13:14]))
+			reply = str(gPlug0.CheckIfOn())
+			SaveSettings()
+
+	elif (data[0:19] == "PowerOnBalconyLight"):
+		if (GetAddedLightings() == 1):
+			gBalconyLight.SetPoweredOn(int(data[20:21]))
+			reply = str(gBalconyLight.CheckIfOn())
+			SaveSettings()
+
+	elif (data[0:12] == "PowerOnBulb0"):
+		if (GetAddedLightings() == 1):
+			gBulb0.SetPoweredOn(int(data[13:14]))
+			reply = str(gBulb0.CheckIfOn())
+			SaveSettings()
+
+	elif (data[0:12] == "PowerOnPlug1"):
+		if (GetAddedLightings() == 1):
+			gPlug1.SetPoweredOn(int(data[13:14]))
+			reply = str(gPlug1.CheckIfOn())
+			SaveSettings()
+
+	elif (data == "GetFluLightProfile"):
+		if (GetAddedLightings() == 1):
+			reply = gFluLight.GetSwitchedOnProfile()
+
+	elif (data == "GetPlug0Profile"):
+		if (GetAddedLightings() == 1):
+			reply = gPlug0.GetSwitchedOnProfile()
+
+	elif (data == "GetBalconyLightProfile"):
+		if (GetAddedLightings() == 1):
+			reply = gBalconyLight.GetSwitchedOnProfile()
+
+	elif (data == "GetFanProfile"):
+		if (GetAddedLightings() == 1):
+			reply = gFan.GetSwitchedOnProfile()
+
+	elif (data == "GetPlug1Profile"):
+		if (GetAddedLightings() == 1):
+			reply = gPlug1.GetSwitchedOnProfile()
+
+	elif (data == "GetBulb0Profile"):
+		if (GetAddedLightings() == 1):
+			reply = gBulb0.GetSwitchedOnProfile()
+
+	return reply
 
 
 def MonitorTcpConnection():

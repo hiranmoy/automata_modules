@@ -40,7 +40,7 @@ from gpioSetup import *
 
 
 
-gDataPointsPerDay = 1024	# number of minutes in one day
+gDataPointsPerDay = 1440	# number of minutes in one day
 
 
 
@@ -316,7 +316,7 @@ class Weather():
 		if (IsSenseHatAdded() != 1):
 			return ""
 
-		curMinute = datetime.datetime.now().minute
+		curMinute = (datetime.datetime.now().hour * 60) + datetime.datetime.now().minute
 		curTemperature = self.mTemperature.GetReading(curMinute)
 
 		# temperature already set
@@ -325,6 +325,13 @@ class Weather():
 
 		self.SetTemperature()
 		return self.mTemperature.GetReading(curMinute)
+
+
+	def GetTemperatureReadings(self):
+		if (IsSenseHatAdded() != 1):
+			return ""
+
+		return self.mTemperature.GetReadings()
 
 
 	def SetTemperature(self):
@@ -339,14 +346,15 @@ class Weather():
 		curTemperature = curTemperature[0:5]
 
 		# update temperature
-		self.mTemperature.SetReadings(datetime.datetime.now().minute, curTemperature)
+		curMinute = (datetime.datetime.now().hour * 60) + datetime.datetime.now().minute
+		self.mTemperature.SetReadings(curMinute, curTemperature)
 
 
 	def GetHumidity(self):
 		if (IsSenseHatAdded() != 1):
 			return ""
 
-		curMinute = datetime.datetime.now().minute
+		curMinute = (datetime.datetime.now().hour * 60) + datetime.datetime.now().minute
 		curHumidity = self.mHumidity.GetReading(curMinute)
 
 		# humidity already set
@@ -355,6 +363,13 @@ class Weather():
 
 		self.SetHumidity()
 		return self.mHumidity.GetReading(curMinute)
+
+
+	def GetHumidityReadings(self):
+		if (IsSenseHatAdded() != 1):
+			return ""
+
+		return self.mHumidity.GetReadings()
 
 
 	def SetHumidity(self):
@@ -369,14 +384,15 @@ class Weather():
 		curHumidity = curHumidity[0:5]
 
 		# update humidity
-		self.mHumidity.SetReadings(datetime.datetime.now().minute, curHumidity)
+		curMinute = (datetime.datetime.now().hour * 60) + datetime.datetime.now().minute
+		self.mHumidity.SetReadings(curMinute, curHumidity)
 
 
 	def GetPressure(self):
 		if (IsSenseHatAdded() != 1):
 			return ""
 
-		curMinute = datetime.datetime.now().minute
+		curMinute =  (datetime.datetime.now().hour * 60) + datetime.datetime.now().minute
 		curPressure = self.mPressure.GetReading(curMinute)
 
 		# pressure already set
@@ -385,6 +401,13 @@ class Weather():
 
 		self.SetPressure()
 		return self.mPressure.GetReading(curMinute)
+
+
+	def GetPressureReadings(self):
+		if (IsSenseHatAdded() != 1):
+			return ""
+
+		return self.mPressure.GetReadings()
 
 
 	def SetPressure(self):
@@ -399,7 +422,8 @@ class Weather():
 		curPressure = curPressure[0:6]
 
 		# update pressure
-		self.mPressure.SetReadings(datetime.datetime.now().minute, curPressure)
+		curMinute =  (datetime.datetime.now().hour * 60) + datetime.datetime.now().minute
+		self.mPressure.SetReadings(curMinute, curPressure)
 
 
 	def UpdateReadings(self):
@@ -447,7 +471,7 @@ class AlcoholSensor(AnalogSensor):
 		if (IsGasSensorAdded() != 1):
 			return ""
 
-		curMinute = datetime.datetime.now().minute
+		curMinute = (datetime.datetime.now().hour * 60) + datetime.datetime.now().minute
 		curAlcoholReading = self.GetReading(curMinute)
 
 		# alcohol reading already set
@@ -468,7 +492,8 @@ class AlcoholSensor(AnalogSensor):
 		curAlcoholReading = bus.read_byte(0x48) # read A/D
 
 		# update alcohol reading
-		AlcoholSensor.SetReadings(self, datetime.datetime.now().minute, float(curAlcoholReading))
+		curMinute = (datetime.datetime.now().hour * 60) + datetime.datetime.now().minute
+		AlcoholSensor.SetReadings(self, curMinute, float(curAlcoholReading))
 
 
 	# virtual
@@ -500,7 +525,7 @@ class COSensor(AnalogSensor):
 		if (IsGasSensorAdded() != 1):
 			return ""
 
-		curMinute = datetime.datetime.now().minute
+		curMinute = (datetime.datetime.now().hour * 60) + datetime.datetime.now().minute
 		curCOReading = self.GetReading(curMinute)
 
 		# CO reading already set
@@ -521,7 +546,8 @@ class COSensor(AnalogSensor):
 		curCOReading = bus.read_byte(0x48) # read A/D
 
 		# update alcohol reading
-		AnalogSensor.SetReadings(self, datetime.datetime.now().minute, float(curCOReading))
+		curMinute = (datetime.datetime.now().hour * 60) + datetime.datetime.now().minute
+		AnalogSensor.SetReadings(self, curMinute, float(curCOReading))
 
 
 	# virtual
@@ -553,7 +579,7 @@ class SmokeSensor(AnalogSensor):
 		if (IsGasSensorAdded() != 1):
 			return ""
 
-		curMinute = datetime.datetime.now().minute
+		curMinute = (datetime.datetime.now().hour * 60) + datetime.datetime.now().minute
 		curSmokeReading = self.GetReading(curMinute)
 
 		# smoke reading already set
@@ -574,7 +600,8 @@ class SmokeSensor(AnalogSensor):
 		curSmokeReading = bus.read_byte(0x48) # read A/D
 
 		# update alcohol reading
-		AnalogSensor.SetReadings(self, datetime.datetime.now().minute, float(curSmokeReading))
+		curMinute = (datetime.datetime.now().hour * 60) + datetime.datetime.now().minute
+		AnalogSensor.SetReadings(self, curMinute, float(curSmokeReading))
 
 
 	# virtual
