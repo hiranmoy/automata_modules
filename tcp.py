@@ -97,8 +97,6 @@ def StartSocket():
 		except:
 			DumpActivity("Connection interrupted", color.cRed)
 			break
- 
-		gDataReceived = 1
 
 		tcpReply = ""
 
@@ -110,6 +108,7 @@ def StartSocket():
 		data = ""
 		if (((numData % 2) != 1) or (numData < 3)):
 			DumpActivity("Incorrect tcp data format : " + tcpData, color.cRed)
+			time.sleep(1)
 		else:
 			for idx in range(0, (numData - 2), 2):
 				key = dataArr[idx]
@@ -124,6 +123,8 @@ def StartSocket():
 				reply = GetTcpReply(data)
 				# tcp reply = <key>#<reply>#
 				tcpReply = key + "#" + reply + "#"
+
+				gDataReceived = 1
 
 		# break from tcp while loop
 		if quit:
