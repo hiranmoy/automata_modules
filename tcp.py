@@ -159,8 +159,9 @@ def StartSocket():
 
 
 def CloseTcpConnection(conn):
-	global gConnected
+	global gDataReceived, gConnected
 	gConnected = 0
+	gDataReceived = 0
 
 		# Close connections
 	conn.close()
