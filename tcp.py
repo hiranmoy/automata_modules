@@ -88,15 +88,15 @@ def StartSocket():
 	DumpActivity("Connected", color.cWhite)
 
 	gConnected = 1
-	quit = 0
 
 	# awaiting for message
 	while True:
 		try:
-			tcpData = conn.recv(16384)
+			tcpData = conn.recv(256)
 		except:
 			DumpActivity("Connection interrupted", color.cRed)
-			break
+			CloseTcpConnection(conn)
+			return 1
 
 		tcpReply = ""
 
@@ -108,7 +108,8 @@ def StartSocket():
 		data = ""
 		if (((numData % 2) != 1) or (numData < 3)):
 			DumpActivity("Incorrect tcp data format : " + tcpData, color.cRed)
-			time.sleep(1)
+			CloseTcpConnection(conn)
+			return 1
 		else:
 			for idx in range(0, (numData - 2), 2):
 				key = dataArr[idx]
@@ -117,36 +118,53 @@ def StartSocket():
 				# quit
 				if (data == "quit"):
 					conn.send(key + "#Terminating#")
-					quit = 1
-					break
+					CloseTcpConnection(conn)
+					return 0
 
 				reply = GetTcpReply(data)
 				# tcp reply = <key>#<reply>#
 				tcpReply = key + "#" + reply + "#"
 
-				gDataReceived = 1
+				if (len(reply) > 64):
+					profileArr = reply.split(',')
+					numReplies = profileArr.__len__()
 
-		# break from tcp while loop
-		if quit:
-			break
+
+					for idx in range(numReplies):
+						partReply = profileArr[idx]
+
+						# part tcp reply = <key>#<min>|<part reply>#
+						partTcpReply = key + "#" + str(idx) + "|" + partReply + "#"
+
+						try:
+							gDataReceived = 1
+							conn.send(partTcpReply)
+							DumpActivity("Message: " + partTcpReply + " sent back in response to: " + tcpData, color.cWhite)
+						except:
+							DumpActivity("Connection interrupted", color.cRed)
+							CloseTcpConnection(conn)
+							return 1
+
+					continue
 
 		try:
+			gDataReceived = 1
 			conn.send(tcpReply)
-			DumpActivity("Message: " + tcpReply[:80] + " sent back in response to: " + tcpData + " at " + CurDateTimeStr(), color.cCyan)
+			DumpActivity("Message: " + tcpReply + " sent back in response to: " + tcpData + " at " + CurDateTimeStr(), color.cCyan)
 		except:
 			DumpActivity("Connection interrupted", color.cRed)
 			break
 
+	return 1
 
-	# Close connections
+
+def CloseTcpConnection(conn):
+	global gConnected
+	gConnected = 0
+
+		# Close connections
 	conn.close()
 	DumpActivity("Tcp connection terminated", color.cWhite)
-
-	gConnected = 0
-	if quit:
-		return 0
-
-	return 1
 
 
 def GetTcpReply(data):
