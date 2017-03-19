@@ -92,7 +92,7 @@ def StartSocket():
 	# awaiting for message
 	while True:
 		try:
-			tcpData = conn.recv(256)
+			tcpData = conn.recv(64)
 		except:
 			DumpActivity("Connection interrupted", color.cRed)
 			CloseTcpConnection(conn)
@@ -117,43 +117,43 @@ def StartSocket():
 
 				# quit
 				if (data == "quit"):
-					conn.send(key + "#Terminating#")
+					conn.send("#" + key + "=Terminating~")
 					CloseTcpConnection(conn)
 					return 0
 
 				reply = GetTcpReply(data)
-				# tcp reply = <key>#<reply>#
-				tcpReply = key + "#" + reply + "#"
+				# tcp reply = #<key>=<reply>~
+				tcpReply = "#" + key + "=" + reply + "~"
 
 				if (len(reply) > 64):
 					profileArr = reply.split(',')
 					numReplies = profileArr.__len__()
 
-
+					DumpActivity(str(numReplies) + " Messages are being sent back in response to: " + tcpData, color.cWhite)
 					for idx in range(numReplies):
 						partReply = profileArr[idx]
 
-						# part tcp reply = <key>#<min>|<part reply>#
-						partTcpReply = key + "#" + str(idx) + "|" + partReply + "#"
+						# part tcp reply = #<key>=<packet index>|<part reply>~
+						partTcpReply = "#" + key + "=" + str(idx) + "|" + partReply + "~"
 
 						try:
 							gDataReceived = 1
 							conn.send(partTcpReply)
-							DumpActivity("Message: " + partTcpReply + " sent back in response to: " + tcpData, color.cWhite)
 						except:
 							DumpActivity("Connection interrupted", color.cRed)
 							CloseTcpConnection(conn)
 							return 1
 
-					continue
-
-		try:
-			gDataReceived = 1
-			conn.send(tcpReply)
-			DumpActivity("Message: " + tcpReply + " sent back in response to: " + tcpData + " at " + CurDateTimeStr(), color.cCyan)
-		except:
-			DumpActivity("Connection interrupted", color.cRed)
-			break
+					DumpActivity(str(numReplies) + " Messages sent back in response to: " + tcpData, color.cWhite)
+				else:
+					try:
+						gDataReceived = 1
+						conn.send(tcpReply)
+						DumpActivity("Message: " + tcpReply + " sent back in response to: " + tcpData + " at " + CurDateTimeStr(), color.cCyan)
+					except:
+						DumpActivity("Connection interrupted", color.cRed)
+						CloseTcpConnection(conn)
+						return 1
 
 	return 1
 
