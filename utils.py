@@ -63,7 +63,7 @@ gSettingsArea = "settings/"
 gLogFile = "activity.log"
 gSettingsFile = "settings.ini"
 gPowerLog = "power.log"
-gSensorLog = "sensor.log"
+gSensorLog = "sensor"
 
 
 
@@ -104,8 +104,21 @@ def GetPowerLogFile():
 	return (GetSettingsArea() + gPowerLog)
 
 
-def GetSensorLogFile():
-	return (GetSettingsArea() + gSensorLog)
+def GetSensorLogFile(month=-1, day=-1):
+	if ((month == -1) and  (day == -1)):
+		return (GetSettingsArea() + gSensorLog + "-" + CurDateStr() + ".log")
+	else:
+		yr = str(datetime.datetime.now().year)
+
+		monthStr = str(month)
+		if (len(monthStr) == 1):
+			monthStr = "0" + monthStr
+
+		dayStr = str(day)
+		if (len(dayStr) == 1):
+			dayStr = "0" + dayStr
+
+		return (GetSettingsArea() + gSensorLog + "-" + yr + "-" + monthStr + "-" + dayStr + ".log")
 
 
 def GetSettingsFile():

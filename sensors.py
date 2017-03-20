@@ -254,29 +254,39 @@ class AnalogSensor():
 		self.mName = name
 
 		# stores sensor data
-		self.mReading = []
-		for idx in range(gDataPointsPerDay):
-			self.mReading.append(0.0)
+		self.mReading = [[[0 for minute in range(0, gDataPointsPerDay)] for day in range(0, 32)] for month in range(0, 13)]
+		for month in range(len(self.mReading)):
+			for day in range(len(self.mReading[month])):
+				for minute in range(len(self.mReading[month][day])):
+					self.mReading[month][day][minute] = 0.0
 
 
-	def GetReadings(self):
+	def GetReadings(self, last24hrs=0):
+		curDateTime = datetime.datetime.now()
+		curMin = (curDateTime.hour * 60) + curDateTime.minute
+		prevDate = datetime.date.today()-datetime.timedelta(1)
 		profileStr = ""
 
 		for idx in range(gDataPointsPerDay):
 			if (idx > 0):
 				profileStr = profileStr + ","
 
-			profileStr = profileStr + str(self.mReading[idx])
+			if ((last24hrs == 0) or (idx < curMin)):
+				profileStr = profileStr + str(self.mReading[curDateTime.month][curDateTime.day][idx])
+			else:
+				profileStr = profileStr + str(self.mReading[prevDate.month][prevDate.day][idx])
 
 		return profileStr
 
 
 	def GetReading(self, minute):
-		return self.mReading[minute]
+		curDateTime = datetime.datetime.now()
+		return self.mReading[curDateTime.month][curDateTime.day][minute]
 
 
 	def SetReadings(self, minute, reading):
-		self.mReading[minute] = reading
+		curDateTime = datetime.datetime.now()
+		self.mReading[curDateTime.month][curDateTime.day][minute] = reading
 
 
 	# virtual
@@ -285,7 +295,7 @@ class AnalogSensor():
 
 
 	# virtual
-	def RestoreReadings(self, lineInput):
+	def RestoreReadings(self, lineInput, month, day):
 		# remove first 23 characters
 		data = lineInput[23:]
 
@@ -297,7 +307,7 @@ class AnalogSensor():
 			return
 
 		for idx in range(gDataPointsPerDay):
-			self.mReading[idx] = float(profileArr[idx])
+			self.mReading[month][day][idx] = float(profileArr[idx])
 
 
 
@@ -331,7 +341,7 @@ class Weather():
 		if (IsSenseHatAdded() != 1):
 			return ""
 
-		return self.mTemperature.GetReadings()
+		return self.mTemperature.GetReadings(1)
 
 
 	def SetTemperature(self):
@@ -369,7 +379,7 @@ class Weather():
 		if (IsSenseHatAdded() != 1):
 			return ""
 
-		return self.mHumidity.GetReadings()
+		return self.mHumidity.GetReadings(1)
 
 
 	def SetHumidity(self):
@@ -407,7 +417,7 @@ class Weather():
 		if (IsSenseHatAdded() != 1):
 			return ""
 
-		return self.mPressure.GetReadings()
+		return self.mPressure.GetReadings(1)
 
 
 	def SetPressure(self):
@@ -447,16 +457,16 @@ class Weather():
 
 
 	# virtual
-	def RestoreReadings(self, idx, lineInput):
+	def RestoreReadings(self, idx, lineInput, month, day):
 		if (IsSenseHatAdded() != 1):
 			return
 
 		if (idx == 1):
-			self.mTemperature.RestoreReadings(lineInput)
+			self.mTemperature.RestoreReadings(lineInput, month, day)
 		if (idx == 2):
-			self.mHumidity.RestoreReadings(lineInput)
+			self.mHumidity.RestoreReadings(lineInput, month, day)
 		if (idx == 3):
-			self.mPressure.RestoreReadings(lineInput)
+			self.mPressure.RestoreReadings(lineInput, month, day)
 
 
 
@@ -506,11 +516,11 @@ class AlcoholSensor(AnalogSensor):
 
 
 	# virtual
-	def RestoreReadings(self, lineInput):
+	def RestoreReadings(self, lineInput, month, day):
 		if (IsGasSensorAdded() != 1):
 			return
 
-		AnalogSensor.RestoreReadings(self, lineInput)
+		AnalogSensor.RestoreReadings(self, lineInput, month, day)
 
 
 
@@ -560,11 +570,11 @@ class COSensor(AnalogSensor):
 
 
 	# virtual
-	def RestoreReadings(self, lineInput):
+	def RestoreReadings(self, lineInput, month, day):
 		if (IsGasSensorAdded() != 1):
 			return
 
-		AnalogSensor.RestoreReadings(self, lineInput)
+		AnalogSensor.RestoreReadings(self, lineInput, month, day)
 
 
 
@@ -614,8 +624,8 @@ class SmokeSensor(AnalogSensor):
 
 
 	# virtual
-	def RestoreReadings(self, lineInput):
+	def RestoreReadings(self, lineInput, month, day):
 		if (IsGasSensorAdded() != 1):
 			return
 
-		AnalogSensor.RestoreReadings(self, lineInput)
+		AnalogSensor.RestoreReadings(self, lineInput, month, day)

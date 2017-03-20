@@ -139,31 +139,29 @@ def RestoreProfileOfAll():
 
 	pProfileFile.close()
 
+	for month in range(13):
+		for day in range(32):
+			# check for sensor log
+			if (os.path.isfile(GetSensorLogFile(month, day))):
+				pProfileFile = open(GetSensorLogFile(month, day), "r")
 
-	# check for sensor log
-	if (os.path.isfile(GetSensorLogFile()) == 0):
-		DumpActivity("No sensor info", color.cCyan)
-		return
+				lineNum = 0
+				for line in pProfileFile:
+					lineNum += 1
 
-	pProfileFile = open(GetSensorLogFile(), "r")
+					if (lineNum < 4):
+						gWeather.RestoreReadings(lineNum, line, month, day)
 
-	lineNum = 0
-	for line in pProfileFile:
-		lineNum += 1
+					if (lineNum == 4):
+						gAlcoholSensor.RestoreReadings(line, month, day)
 
-		if (lineNum < 4):
-			gWeather.RestoreReadings(lineNum, line)
+					if (lineNum == 5):
+						gCOSensor.RestoreReadings(line, month, day)
 
-		if (lineNum == 4):
-			gAlcoholSensor.RestoreReadings(line)
+					if (lineNum == 6):
+						gSmokeSensor.RestoreReadings(line, month, day)
 
-		if (lineNum == 5):
-			gCOSensor.RestoreReadings(line)
-
-		if (lineNum == 6):
-			gSmokeSensor.RestoreReadings(line)
-
-	pProfileFile.close()
+				pProfileFile.close()
 
 
 def GetPowerOnLED():
