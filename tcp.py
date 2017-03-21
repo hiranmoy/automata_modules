@@ -37,6 +37,10 @@ from utils2 import *
 
 
 
+Timer1sec = None
+
+
+
 gHost = commands.getstatusoutput('hostname -I')[1]		# Server IP or Hostname, like 192.168.1.100 
 gPort = 10001		# Pick an open Port (1000+ recommended), must match the client sport
 gConnected = 0
@@ -89,6 +93,10 @@ def StartSocket():
 
 	gConnected = 1
 
+	# start 1 sec timer thread
+	timer1secThread = threading.Thread(target=Timer1sec, args=[conn])
+	timer1secThread.start()
+
 	# awaiting for message
 	while True:
 		try:
@@ -122,8 +130,6 @@ def StartSocket():
 					return 0
 
 				reply = GetTcpReply(data)
-				# tcp reply = #<key>=<reply>~
-				tcpReply = "#" + key + "=" + reply + "~"
 
 				if (len(reply) > 64):
 					profileArr = reply.split(',')
@@ -132,30 +138,45 @@ def StartSocket():
 					DumpActivity(str(numReplies) + " Messages are being sent back in response to: " + tcpData, color.cWhite)
 					for idx in range(numReplies):
 						partReply = profileArr[idx]
-
-						# part tcp reply = #<key>=<packet index>|<part reply>~
-						partTcpReply = "#" + key + "=" + str(idx) + "|" + partReply + "~"
-
-						try:
-							gDataReceived = 1
-							conn.send(partTcpReply)
-						except:
-							DumpActivity("Connection interrupted", color.cRed)
-							CloseTcpConnection(conn)
+						success = SendTcpMessage(conn, key, partReply, idx)
+						if (success == 0):
 							return 1
 
 					DumpActivity(str(numReplies) + " Messages sent back in response to: " + tcpData, color.cWhite)
 				else:
-					try:
-						gDataReceived = 1
-						conn.send(tcpReply)
-						DumpActivity("Message: " + tcpReply + " sent back in response to: " + tcpData + " at " + CurDateTimeStr(), color.cCyan)
-					except:
-						DumpActivity("Connection interrupted", color.cRed)
-						CloseTcpConnection(conn)
-						return 1
+					success = SendTcpMessage(conn, key, reply)
+					if (success == 0):
+							return 1
+
+					DumpActivity("Message: " + reply + " sent back in response to: " + tcpData + " at " + CurDateTimeStr(), color.cCyan)
 
 	return 1
+
+
+def SendTcpMessage(conn, key, reply, idx=-1):
+	global gDataReceived
+
+	# tcp reply	= #<key>=<reply>~
+	# 			 or = #<key>=<packet index>|<part reply>~
+
+	tcpReply = "#" + key + "="
+
+	if (idx > 0):
+		tcpReply = tcpReply + str(idx) + "|"
+
+	tcpReply = tcpReply + reply + "~"
+
+	try:
+		gDataReceived = 1
+		conn.send(tcpReply)
+
+		if (key[0] == "-"):
+			DumpActivity("Message: " + reply + " sent back (key):" + str(key) + " at " + CurDateTimeStr(), color.cWhite)
+		return 1
+	except:
+		DumpActivity("Connection interrupted", color.cRed)
+		CloseTcpConnection(conn)
+		return 0
 
 
 def CloseTcpConnection(conn):
@@ -202,16 +223,6 @@ def GetTcpReply(data):
 	elif (data == "GetPressureProfile"):
 		if IsSenseHatAdded():
 			reply = gWeather.GetPressureReadings()
-
-	elif (data == "ExtractMonitorStatus"):
-		if IsMotionSensorAdded():
-			reply = gMotionSensor.GetLastTriggeredTime()
-			gMotionSensor.ClearTriggeredStatus()
-
-	elif (data == "ExtractTouchSensorStatus"):
-		if (GetAddedTouchSensor() == 1):
-			reply = str(gTouchSensor.GetLastTriggeredTime())
-			gTouchSensor.ClearTriggeredStatus()
 
 	elif (data == "ToggleLED"):
 		if (GetAddedLightings() == 2):
@@ -379,6 +390,7 @@ def GetTcpReply(data):
 	return reply
 
 
+# ===================================	timer	===================================
 def MonitorTcpConnection():
 	global gDataReceived
 
@@ -404,3 +416,34 @@ def MonitorTcpConnection():
 					KillTcp()
 
 				gDataReceived = 0
+
+
+def Timer1sec(conn):
+	while(1):
+		if gExit:
+			break
+
+		if gConnected:
+			if IsMotionSensorAdded():
+				reply = gMotionSensor.GetLastTriggeredTime()
+
+				if (reply != "-"):
+					# motion sensor status key = -1
+					success = SendTcpMessage(conn, "-1", reply)
+					if (success == 0):
+						return
+					gMotionSensor.ClearTriggeredStatus()
+
+			if (GetAddedTouchSensor() == gTouchSensor.GetId()):
+				reply = gTouchSensor.GetLastTriggeredTime()
+
+				if (reply != "-"):
+					# touch sensor status key = -2
+					success = SendTcpMessage(conn, "-2", reply)
+					if (success == 0):
+						return
+					gTouchSensor.ClearTriggeredStatus()
+		else:
+			return
+
+		time.sleep(1)

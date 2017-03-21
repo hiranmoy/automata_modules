@@ -102,7 +102,7 @@ class DigitalSensor():
 	def EnableSensor(self, enable=1):
 		if (enable == 1):
 			GPIO.add_event_detect(self.mGPIO, GPIO.RISING, callback=self.SensorTriggered)
-			DumpActivity(self.mName + " enabled at " + GetTime(), color.cCyan)
+			DumpActivity(self.mName + " enabled at " + GetTime(), color.cGreen)
 		else:
 			GPIO.remove_event_detect(self.mGPIO)
 			DumpActivity(self.mName + " disabled at " + GetTime(), color.cPink)
@@ -119,6 +119,10 @@ class TouchSensor(DigitalSensor):
 
 		# touch sensor id
 		self.mId = idx
+
+
+	def GetId(self):
+		return self.mId
 
 
 	#virtual

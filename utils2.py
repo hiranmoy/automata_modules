@@ -70,8 +70,8 @@ def SaveSettings():
 	pSettingsFile = open(GetSettingsFile(), "w")
 
 	pSettingsFile.write(str(gMotionSensor.IsEnabled()) + "    : Enable Motion Sensor\n")			# 1
-	pSettingsFile.write(str(GetIsDisableVideo()) + "    : Disable Video\n")													# 2
-	pSettingsFile.write(str(GetIsDisableAudio()) + "    : Disable Audio\n")													# 3
+	pSettingsFile.write(str(GetIsDisableVideo()) + "    : Disable Video\n")										# 2
+	pSettingsFile.write(str(GetIsDisableAudio()) + "    : Disable Audio\n")										# 3
 	#pSettingsFile.write(str(gEnableBluetooth) + "    : Enable Bluetooth\n")									
 
 	pSettingsFile.close()

@@ -75,9 +75,12 @@ def DumpActivity(dumpStr, colorCode):
 	if (os.path.isdir(GetDumpArea()) == 0):
 		return
 
-	pLogFile = open(GetLogFile(), "a")
-	pLogFile.write("%s\n" % dumpStr)
-	pLogFile.close()
+	try:
+		pLogFile = open(GetLogFile(), "a")
+		pLogFile.write("%s\n" % dumpStr)
+		pLogFile.close()
+	except:
+		print "File write error in - " + GetLogFile()
 
 
 def GetSurvDir():
