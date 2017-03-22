@@ -214,15 +214,15 @@ def GetTcpReply(data):
 
 	elif (data == "GetTemperatureProfile"):
 		if IsSenseHatAdded():
-			reply = gWeather.GetTemperatureReadings()
+			reply = gWeather.GetTemperatureReadings(3)
 
 	elif (data == "GetHumidityProfile"):
 		if IsSenseHatAdded():
-			reply = gWeather.GetHumidityReadings()
+			reply = gWeather.GetHumidityReadings(3)
 
 	elif (data == "GetPressureProfile"):
 		if IsSenseHatAdded():
-			reply = gWeather.GetPressureReadings()
+			reply = gWeather.GetPressureReadings(3)
 
 	elif (data == "ToggleLED"):
 		if (GetAddedLightings() == 2):

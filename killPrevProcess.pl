@@ -46,8 +46,12 @@ sub main
 	my @processStr = split(' ', $process);
 	my $processId = $processStr[1];
 
-	print "Killing process id:".$processId."\n";
-	`kill -9 $processId`;
+	my $curProcessId = $ARGV[0];
+	if ($processId ne $curProcessId)
+	{
+		print "Killing process id:".$processId."\n";
+		`kill -9 $processId`;
+	}
 }
 
 main;

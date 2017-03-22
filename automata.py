@@ -91,7 +91,7 @@ def KillPrevProcesses():
 		shutil.move(activityLog, prevActivityLog)
 
 	# kill the already running processes if still running
-	command = GetDumpArea() + "killPrevProcess.pl"
+	command = GetAutomataDir() + "killPrevProcess.pl " + str(os.getpid())
 	os.system(command)
 
 	ExitThread(0)

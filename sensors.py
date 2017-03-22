@@ -265,13 +265,13 @@ class AnalogSensor():
 					self.mReading[month][day][minute] = 0.0
 
 
-	def GetReadings(self, last24hrs=0):
+	def GetReadings(self, last24hrs=0, div=1):
 		curDateTime = datetime.datetime.now()
 		curMin = (curDateTime.hour * 60) + curDateTime.minute
 		prevDate = datetime.date.today()-datetime.timedelta(1)
 		profileStr = ""
 
-		for idx in range(gDataPointsPerDay):
+		for idx in range(0, gDataPointsPerDay, div):
 			if (idx > 0):
 				profileStr = profileStr + ","
 
@@ -341,11 +341,11 @@ class Weather():
 		return self.mTemperature.GetReading(curMinute)
 
 
-	def GetTemperatureReadings(self):
+	def GetTemperatureReadings(self, div=1):
 		if (IsSenseHatAdded() != 1):
 			return ""
 
-		return self.mTemperature.GetReadings(1)
+		return self.mTemperature.GetReadings(1, div)
 
 
 	def SetTemperature(self):
@@ -379,11 +379,11 @@ class Weather():
 		return self.mHumidity.GetReading(curMinute)
 
 
-	def GetHumidityReadings(self):
+	def GetHumidityReadings(self, div=1):
 		if (IsSenseHatAdded() != 1):
 			return ""
 
-		return self.mHumidity.GetReadings(1)
+		return self.mHumidity.GetReadings(1, div)
 
 
 	def SetHumidity(self):
@@ -417,11 +417,11 @@ class Weather():
 		return self.mPressure.GetReading(curMinute)
 
 
-	def GetPressureReadings(self):
+	def GetPressureReadings(self, div=1):
 		if (IsSenseHatAdded() != 1):
 			return ""
 
-		return self.mPressure.GetReadings(1)
+		return self.mPressure.GetReadings(1, div)
 
 
 	def SetPressure(self):
