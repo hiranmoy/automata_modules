@@ -90,6 +90,10 @@ def KillPrevProcesses():
 		prevActivityLog = "/home/pi/activity.log"
 		shutil.move(activityLog, prevActivityLog)
 
+	# kill the already running processes if still running
+	command = GetDumpArea() + "killPrevProcess.pl"
+	os.system(command)
+
 	ExitThread(0)
 
 
