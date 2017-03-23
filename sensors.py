@@ -265,7 +265,7 @@ class AnalogSensor():
 					self.mReading[month][day][minute] = 0.0
 
 
-	def GetReadings(self, last24hrs=0, div=1):
+	def GetReadings(self, last24hrs=0, div=1, date=""):
 		curDateTime = datetime.datetime.now()
 		curMin = (curDateTime.hour * 60) + curDateTime.minute
 		prevDate = datetime.date.today()-datetime.timedelta(1)
@@ -275,10 +275,21 @@ class AnalogSensor():
 			if (idx > 0):
 				profileStr = profileStr + ","
 
-			if ((last24hrs == 0) or (idx < curMin)):
-				profileStr = profileStr + str(self.mReading[curDateTime.month][curDateTime.day][idx])
+			if (date == ""):
+				if ((last24hrs == 0) or (idx < curMin)):
+					profileStr = profileStr + str(self.mReading[curDateTime.month][curDateTime.day][idx])
+				else:
+					profileStr = profileStr + str(self.mReading[prevDate.month][prevDate.day][idx])
 			else:
-				profileStr = profileStr + str(self.mReading[prevDate.month][prevDate.day][idx])
+				dateArr = date.split('-')
+				numParts = dateArr.__len__()
+
+				# number of sub strings should be 2
+				if (numParts != 2):
+					DumpActivity("Invalid date: " + date + " reading for sensor data " + self.mName, color.cRed)
+					return profileStr
+
+				profileStr = profileStr + str(self.mReading[int(dateArr[0])][int(dateArr[1])][idx])
 
 		return profileStr
 
@@ -341,11 +352,11 @@ class Weather():
 		return self.mTemperature.GetReading(curMinute)
 
 
-	def GetTemperatureReadings(self, div=1):
+	def GetTemperatureReadings(self, div=1, date=""):
 		if (IsSenseHatAdded() != 1):
 			return ""
 
-		return self.mTemperature.GetReadings(1, div)
+		return self.mTemperature.GetReadings(1, div, date)
 
 
 	def SetTemperature(self):
@@ -379,11 +390,11 @@ class Weather():
 		return self.mHumidity.GetReading(curMinute)
 
 
-	def GetHumidityReadings(self, div=1):
+	def GetHumidityReadings(self, div=1, date=""):
 		if (IsSenseHatAdded() != 1):
 			return ""
 
-		return self.mHumidity.GetReadings(1, div)
+		return self.mHumidity.GetReadings(1, div, date)
 
 
 	def SetHumidity(self):
@@ -417,11 +428,11 @@ class Weather():
 		return self.mPressure.GetReading(curMinute)
 
 
-	def GetPressureReadings(self, div=1):
+	def GetPressureReadings(self, div=1, date=""):
 		if (IsSenseHatAdded() != 1):
 			return ""
 
-		return self.mPressure.GetReadings(1, div)
+		return self.mPressure.GetReadings(1, div, date)
 
 
 	def SetPressure(self):

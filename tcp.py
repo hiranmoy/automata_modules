@@ -213,17 +213,17 @@ def GetTcpReply(data):
 							str(gCOSensor.GetCOReading()) + "," + \
 							str(gSmokeSensor.GetSmokeReading())
 
-	elif (data == "GetTemperatureProfile"):
+	elif (data[0:21] == "GetTemperatureProfile"):
 		if IsSenseHatAdded():
-			reply = gWeather.GetTemperatureReadings(3)
+			reply = gWeather.GetTemperatureReadings(3, data[22:])
 
-	elif (data == "GetHumidityProfile"):
+	elif (data[0:18] == "GetHumidityProfile"):
 		if IsSenseHatAdded():
-			reply = gWeather.GetHumidityReadings(3)
+			reply = gWeather.GetHumidityReadings(3, data[19:])
 
-	elif (data == "GetPressureProfile"):
+	elif (data[0:18] == "GetPressureProfile"):
 		if IsSenseHatAdded():
-			reply = gWeather.GetPressureReadings(3)
+			reply = gWeather.GetPressureReadings(3, data[19:])
 
 	elif (data == "ToggleLED"):
 		if (GetAddedLightings() == 2):
