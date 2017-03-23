@@ -57,7 +57,7 @@ def KillTcp():
 	os.system(command)
 
 
-def StartTcpThread():
+def StartTcp():
 	global gDataReceived
 
 	bindFailed = 1
@@ -167,8 +167,8 @@ def SendTcpMessage(conn, key, reply, idx=-1):
 	tcpReply = tcpReply + reply + "~"
 
 	try:
-		gDataReceived = 1
 		conn.send(tcpReply)
+		gDataReceived = 1
 
 		if (key[0] == "-"):
 			DumpActivity("Message: " + reply + " sent back (key):" + str(key) + " at " + CurDateTimeStr(), color.cWhite)
@@ -181,12 +181,13 @@ def SendTcpMessage(conn, key, reply, idx=-1):
 
 def CloseTcpConnection(conn):
 	global gDataReceived, gConnected
-	gConnected = 0
-	gDataReceived = 0
-
-		# Close connections
+	
+	# Close connections
 	conn.close()
 	DumpActivity("Tcp connection terminated", color.cWhite)
+
+	gConnected = 0
+	gDataReceived = 0
 
 
 def GetTcpReply(data):

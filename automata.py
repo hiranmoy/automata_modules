@@ -296,7 +296,7 @@ gTimer1MinThread.start()
 
 
 # start tcp
-StartTcpThread()
+StartTcp()
 
 
 # closing
