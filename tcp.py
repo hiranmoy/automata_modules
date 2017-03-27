@@ -45,6 +45,7 @@ gHost = commands.getstatusoutput('hostname -I')[1]		# Server IP or Hostname, lik
 gPort = 10001		# Pick an open Port (1000+ recommended), must match the client sport
 gConnected = 0
 gDataReceived = 0
+gConnection = None
 
 
 
@@ -58,11 +59,13 @@ def KillTcp():
 
 
 def StartTcp():
-	global gDataReceived
+	global gDataReceived, gConnection
 
 	bindFailed = 1
 	while bindFailed:
 		bindFailed = StartSocket()
+
+		gConnection = None
 		gDataReceived = 0
 
 		# wait for 10 sec before trying a socket connection
@@ -72,11 +75,14 @@ def StartTcp():
 
 
 def StartSocket():
-	global gConnected, gDataReceived
+	global gConnected, gDataReceived, gConnection
 	gConnected = 0
+	gConnection = None
+
 
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	DumpActivity("Socket created", color.cWhite)
+
 
 	# managing error exception
 	try:
@@ -85,28 +91,28 @@ def StartSocket():
 		DumpActivity("Bind failed", color.cRed)
 		return 1
 
+
 	# wait for connections
 	s.listen(5)
 	DumpActivity("Socket awaiting messages", color.cWhite)
-	(conn, addr) = s.accept()
+	(gConnection, addr) = s.accept()
 	DumpActivity("Connected", color.cWhite)
-
 	gConnected = 1
 
+
 	# start 1 sec timer thread
-	timer1secThread = threading.Thread(target=Timer1sec, args=[conn])
+	timer1secThread = threading.Thread(target=Timer1sec)
 	timer1secThread.start()
+
 
 	# awaiting for message
 	while True:
 		try:
-			tcpData = conn.recv(64)
+			tcpData = gConnection.recv(64)
 		except:
 			DumpActivity("Connection interrupted", color.cRed)
-			CloseTcpConnection(conn)
+			CloseTcpConnection()
 			return 1
-
-		tcpReply = ""
 
 		# split tcpData into key and data based '#' char
 		# tcpData = <key>#<data>
@@ -116,7 +122,7 @@ def StartSocket():
 		data = ""
 		if (((numData % 2) != 1) or (numData < 3)):
 			DumpActivity("Incorrect tcp data format : " + tcpData, color.cRed)
-			CloseTcpConnection(conn)
+			CloseTcpConnection()
 			return 1
 		else:
 			for idx in range(0, (numData - 2), 2):
@@ -125,8 +131,8 @@ def StartSocket():
 
 				# quit
 				if (data == "quit"):
-					conn.send("#" + key + "=Terminating~")
-					CloseTcpConnection(conn)
+					gConnection.send("#" + key + "=Terminating~")
+					CloseTcpConnection()
 					return 0
 
 				reply = GetTcpReply(data)
@@ -138,13 +144,13 @@ def StartSocket():
 					DumpActivity(str(numReplies) + " Messages are being sent back in response to: " + tcpData, color.cWhite)
 					for idx in range(numReplies):
 						partReply = profileArr[idx]
-						success = SendTcpMessage(conn, key, partReply, idx)
+						success = SendTcpMessage(key, partReply, idx)
 						if (success == 0):
 							return 1
 
 					DumpActivity(str(numReplies) + " Messages sent back in response to: " + tcpData, color.cWhite)
 				else:
-					success = SendTcpMessage(conn, key, reply)
+					success = SendTcpMessage(key, reply)
 					if (success == 0):
 							return 1
 
@@ -153,7 +159,7 @@ def StartSocket():
 	return 1
 
 
-def SendTcpMessage(conn, key, reply, idx=-1):
+def SendTcpMessage(key, reply, idx=-1):
 	global gDataReceived
 
 	# tcp reply	= #<key>=<reply>~
@@ -167,7 +173,7 @@ def SendTcpMessage(conn, key, reply, idx=-1):
 	tcpReply = tcpReply + reply + "~"
 
 	try:
-		conn.send(tcpReply)
+		gConnection.send(tcpReply)
 		gDataReceived = 1
 
 		if (key[0] == "-"):
@@ -175,19 +181,28 @@ def SendTcpMessage(conn, key, reply, idx=-1):
 		return 1
 	except:
 		DumpActivity("Connection interrupted", color.cRed)
-		CloseTcpConnection(conn)
+		CloseTcpConnection()
 		return 0
 
 
-def CloseTcpConnection(conn):
+def CloseTcpConnection():
 	global gDataReceived, gConnected
 	
 	# Close connections
-	conn.close()
+	gConnection.close()
 	DumpActivity("Tcp connection terminated", color.cWhite)
 
 	gConnected = 0
 	gDataReceived = 0
+
+
+def ConnectAndCloseConnection():
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	try:
+		s.connect((gHost, gPort))
+		s.close()
+	except:
+		DumpActivity("Unable to connect and close tcp", color.cRed)
 
 
 def GetTcpReply(data):
@@ -396,6 +411,7 @@ def MonitorTcpConnection():
 	global gDataReceived
 
 	timeInSec = 0
+	timeInMin = 0.0
 
 	while(1):
 		if IsExitTread():
@@ -406,20 +422,26 @@ def MonitorTcpConnection():
 
 		if (timeInSec == 30):
 			timeInSec = 0
+			timeInMin += 0.5
 
 			if IsDebugMode():
 				# debug mode
 				continue
 
 			if gConnected:
-				if (gDataReceived == 0):
-					DumpActivity("Killing tcp connection after not received any response from client for 1 min", color.cCyan)
+				if (gDataReceived == 0) and (gConnection != None):
+					DumpActivity("Killing tcp connection after not received any response from client for 1 min", color.cPink)
 					KillTcp()
 
 				gDataReceived = 0
 
+			elif (timeInMin >= 10):
+				DumpActivity("Starting new tcp connection after not connecting to any client for 10 min", color.cPink)
+				ConnectAndCloseConnection()
+				timeInMin = 0.0
 
-def Timer1sec(conn):
+
+def Timer1sec():
 	while(1):
 		if gExit:
 			break
@@ -430,7 +452,7 @@ def Timer1sec(conn):
 
 				if (reply != "-"):
 					# motion sensor status key = -1
-					success = SendTcpMessage(conn, "-1", reply)
+					success = SendTcpMessage(gConnection, "-1", reply)
 					if (success == 0):
 						return
 					gMotionSensor.ClearTriggeredStatus()
@@ -440,7 +462,7 @@ def Timer1sec(conn):
 
 				if (reply != "-"):
 					# touch sensor status key = -2
-					success = SendTcpMessage(conn, "-2", reply)
+					success = SendTcpMessage(gConnection, "-2", reply)
 					if (success == 0):
 						return
 					gTouchSensor.ClearTriggeredStatus()
