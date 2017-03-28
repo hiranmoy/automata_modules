@@ -203,6 +203,7 @@ def ConnectAndCloseConnection():
 		s.close()
 	except:
 		DumpActivity("Unable to connect and close tcp", color.cRed)
+		KillTcp()
 
 
 def GetTcpReply(data):
