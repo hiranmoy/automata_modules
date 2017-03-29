@@ -77,7 +77,7 @@ def SaveSettings():
 	pSettingsFile.close()
 
 
-def SaveProfileOfAll():
+def SaveProfileOfAllAppliances():
 	pProfileFile = open(GetPowerLogFile(), "w")
 
 	gFluLight.SaveProfile(pProfileFile)							# 1
@@ -91,6 +91,7 @@ def SaveProfileOfAll():
 	pProfileFile.close()
 
 
+def SaveProfileOfAllSensors():
 	pProfileFile = open(GetSensorLogFile(), "w")
 
 	gWeather.SaveReadings(pProfileFile)							# 1-3
@@ -364,4 +365,5 @@ def Timer1Min():
 			if IsSenseHatAdded():
 				gWeather.UpdateReadings()
 
-			SaveProfileOfAll()
+			SaveProfileOfAllAppliances()
+			SaveProfileOfAllSensors()

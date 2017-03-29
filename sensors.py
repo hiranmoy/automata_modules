@@ -59,6 +59,12 @@ class DigitalSensor():
 		# stores when sensor was triggered last time
 		self.mLastTriggeredTime = "-"
 
+		# clear GPIO event
+		try:
+			GPIO.remove_event_detect(self.mGPIO)
+		except:
+			print ""
+
 
 	def IsEnabled(self):
 		return self.mEnabled
@@ -99,7 +105,10 @@ class DigitalSensor():
 
 
 	#virtual
-	def EnableSensor(self, enable=1):
+	def EnableSensor(self, enable=1, dontUpdateStatus=0):
+		if (enable == self.mEnabled):
+			return
+
 		if (enable == 1):
 			GPIO.add_event_detect(self.mGPIO, GPIO.RISING, callback=self.SensorTriggered)
 			DumpActivity(self.mName + " enabled at " + GetTime(), color.cGreen)
@@ -107,7 +116,8 @@ class DigitalSensor():
 			GPIO.remove_event_detect(self.mGPIO)
 			DumpActivity(self.mName + " disabled at " + GetTime(), color.cPink)
 
-		self.mEnabled = enable
+		if (dontUpdateStatus == 0):
+			self.mEnabled = enable
 
 
 
@@ -203,6 +213,9 @@ class MotionSensor(DigitalSensor):
 		if (IsMotionSensorAdded() != 1):
 			return
 
+		# disable motion sensor temporarily
+		DigitalSensor.EnableSensor(self, 0, 1)
+
 		curDateTime = datetime.datetime.now()
 		curSurvDir = GetSurvDir() + str(curDateTime.date())
 
@@ -215,6 +228,9 @@ class MotionSensor(DigitalSensor):
 		thread.start_new_thread(self.RecordShortAudio, ())		# 3 sec
 
 		time.sleep(17)
+
+		# enable motion sensor again
+		DigitalSensor.EnableSensor(self, 1, 1)
 
 
 	def TakeShortClip(self):

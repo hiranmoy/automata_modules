@@ -404,6 +404,10 @@ def GetTcpReply(data):
 		if (GetAddedLightings() == 1):
 			reply = gBulb0.GetSwitchedOnProfile()
 
+	SaveSettings()
+	SaveProfileOfAllAppliances()
+	SaveProfileOfAllSensors()
+
 	return reply
 
 
