@@ -106,18 +106,20 @@ class DigitalSensor():
 
 	#virtual
 	def EnableSensor(self, enable=1, dontUpdateStatus=0):
-		if (enable == self.mEnabled):
-			return
 
-		if (enable == 1):
-			GPIO.add_event_detect(self.mGPIO, GPIO.RISING, callback=self.SensorTriggered)
-			DumpActivity(self.mName + " enabled at " + GetTime(), color.cGreen)
-		else:
-			GPIO.remove_event_detect(self.mGPIO)
-			DumpActivity(self.mName + " disabled at " + GetTime(), color.cPink)
+		try:
+			if (enable == 1):
+				GPIO.add_event_detect(self.mGPIO, GPIO.RISING, callback=self.SensorTriggered)
+				DumpActivity(self.mName + " enabled at " + GetTime(), color.cGreen)
+			else:
+				GPIO.remove_event_detect(self.mGPIO)
+				DumpActivity(self.mName + " disabled at " + GetTime(), color.cPink)
 
-		if (dontUpdateStatus == 0):
-			self.mEnabled = enable
+			if (dontUpdateStatus == 0):
+				self.mEnabled = enable
+		except:
+			DumpActivity(self.mName + " remained enabled:" + str(self.mEnabled) + " at " + GetTime(), color.cRed)
+		
 
 
 
