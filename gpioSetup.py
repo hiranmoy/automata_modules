@@ -41,9 +41,9 @@ GPIO.setmode(GPIO.BCM)
 motionGPIO = 5
 touchGPIO = 25
 #bluetoothGPIO = 16
-lightGPIO = 20
-fluLightGPIO = 19
-plug0GPIO = 13
+lightGPIO = 21
+fluLightGPIO = 26
+plug0GPIO = 20
 fanGPIO = 12
 balconyLightGPIO = 26
 bulb0GPIO = 6
@@ -69,14 +69,6 @@ def SetupGPIOs():
 
 
 	if (GetAddedLightings() == 1):
-		# Fluorescent light control (active high)
-		GPIO.setup(fluLightGPIO, GPIO.OUT)
-
-
-		# Plug0 control (active high)
-		GPIO.setup(plug0GPIO, GPIO.OUT)
-
-
 		# Fan control (active high)
 		GPIO.setup(fanGPIO, GPIO.OUT)
 
@@ -94,8 +86,14 @@ def SetupGPIOs():
 
 
 	if (GetAddedLightings() == 2):
+		# Fluorescent light control (active high)
+		GPIO.setup(fluLightGPIO, GPIO.OUT)
+
 		# LED light control (active high)
 		GPIO.setup(lightGPIO, GPIO.OUT)
+
+		# Plug0 control (active high)
+		GPIO.setup(plug0GPIO, GPIO.OUT)
 
 
 	if (GetAddedLirc() == 1):
@@ -108,15 +106,15 @@ def ClearGPIO():
 	#GPIO.output(bluetoothGPIO, False)
 
 	if (GetAddedLightings() == 1):
-		GPIO.output(fluLightGPIO, False)
-		GPIO.output(plug0GPIO, False)
 		GPIO.output(fanGPIO, False)
 		GPIO.output(balconyLightGPIO, False)
 		GPIO.output(bulb0GPIO, False)
 		GPIO.output(plug1GPIO, False)
 
 	if (GetAddedLightings() == 2):
+		GPIO.output(fluLightGPIO, False)
 		GPIO.output(lightGPIO, False)
+		GPIO.output(plug0GPIO, False)
 
 	if (GetAddedLirc() == 1):
 		GPIO.output(ledFloodGPIO, False)

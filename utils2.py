@@ -34,8 +34,8 @@ from sensors import *
 
 
 
-gFluLight = Appliance(1, fluLightGPIO, "fluLight")
-gPlug0 = Appliance(1, plug0GPIO, "plug0")
+gFluLight = Appliance(2, fluLightGPIO, "fluLight")
+gPlug0 = Appliance(2, plug0GPIO, "plug0")
 gFan = Appliance(1, fanGPIO, "fan")
 gBalconyLight = Appliance(1, balconyLightGPIO, "balconyLight")
 gBulb0 = Appliance(1, bulb0GPIO, "bulb0")

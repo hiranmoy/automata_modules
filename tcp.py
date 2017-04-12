@@ -289,11 +289,11 @@ def GetTcpReply(data):
 			reply = str(GetIsDisableAudio())
 
 	elif (data == "CheckIfOnFluLight"):
-		if (GetAddedLightings() == 1):
+		if (GetAddedLightings() == 2):
 			reply = str(gFluLight.CheckIfOn())
 
 	elif (data == "CheckIfOnPlug0"):
-		if (GetAddedLightings() == 1):
+		if (GetAddedLightings() == 2):
 			reply = str(gPlug0.CheckIfOn())
 
 	elif (data == "CheckIfOnFan"):
@@ -351,13 +351,13 @@ def GetTcpReply(data):
 			SaveSettings()
 
 	elif (data[0:15] == "PowerOnFluLight"):
-		if (GetAddedLightings() == 1):
+		if (GetAddedLightings() == 2):
 			gFluLight.SetPoweredOn(int(data[16:17]))
 			reply = str(gFluLight.CheckIfOn())
 			SaveSettings()
 
 	elif (data[0:12] == "PowerOnPlug0"):
-		if (GetAddedLightings() == 1):
+		if (GetAddedLightings() == 2):
 			gPlug0.SetPoweredOn(int(data[13:14]))
 			reply = str(gPlug0.CheckIfOn())
 			SaveSettings()
@@ -381,11 +381,11 @@ def GetTcpReply(data):
 			SaveSettings()
 
 	elif (data == "GetFluLightProfile"):
-		if (GetAddedLightings() == 1):
+		if (GetAddedLightings() == 2):
 			reply = gFluLight.GetSwitchedOnProfile()
 
 	elif (data == "GetPlug0Profile"):
-		if (GetAddedLightings() == 1):
+		if (GetAddedLightings() == 2):
 			reply = gPlug0.GetSwitchedOnProfile()
 
 	elif (data == "GetBalconyLightProfile"):
