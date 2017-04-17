@@ -40,15 +40,19 @@ GPIO.setmode(GPIO.BCM)
 
 motionGPIO = 5
 touchGPIO = 25
+
 #bluetoothGPIO = 16
+
 lightGPIO = 21
 fluLightGPIO = 26
 plug0GPIO = 20
-fanGPIO = 12
-balconyLightGPIO = 26
-bulb0GPIO = 6
-plug1GPIO = 21
-ledFloodGPIO = 24
+
+balconyLightGPIO = 12	# not used right now
+
+fanGPIO = 20
+bulb0GPIO = 16
+ledFloodGPIO = 21
+plug1GPIO = 26
 
 
 
