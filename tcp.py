@@ -425,9 +425,9 @@ def MonitorTcpConnection():
 		time.sleep(1)
 		timeInSec += 1
 
-		if (timeInSec == 30):
+		if (timeInSec == 60):
 			timeInSec = 0
-			timeInMin += 0.5
+			timeInMin += 1
 
 			if IsDebugMode():
 				# debug mode
@@ -435,7 +435,7 @@ def MonitorTcpConnection():
 
 			if gConnected:
 				if (gDataReceived == 0) and (gConnection != None):
-					DumpActivity("Killing tcp connection after not received any response from client for 1 min", color.cPink)
+					DumpActivity("Killing tcp connection after not received any response from client for 2 min", color.cPink)
 					KillTcp()
 
 				gDataReceived = 0
