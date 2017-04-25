@@ -59,6 +59,10 @@ class Appliance():
 
 
 	def SetPoweredOnOnly(self, on=1):
+		# some devices are always powered on
+		if (self.mGPIO < 0):
+			return
+
 		self.mPoweredOn = on
 
 		if (self.mPoweredOn):

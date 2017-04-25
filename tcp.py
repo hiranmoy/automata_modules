@@ -322,11 +322,22 @@ def GetTcpReply(data):
 			gLEDFlood.SetupLEDFloodLight(0)
 			reply = "off"
 
-	elif (data[0:13] == "ClickOnButton"):
+	elif (data[0:20] == "ClickOnLEDFloodLight"):
 		if (GetAddedLirc() == 1):
-			ledKey = gLEDFlood.GetLEDKEYs(int(data[14:16]))
-			gLEDFlood.SendIRSignal(ledKey)
-			reply = "button " + data[14:16] + " pressed"
+			irKey = gLEDFlood.GetLEDKEYs(int(data[21:23]))
+			gLEDFlood.SendIRSignal(irKey)
+			reply = "LED Flood Light button " + data[21:23] + " pressed"
+
+	elif (data == "SetupSpeaker"):
+		if (GetAddedLirc() == 1):
+			gSpeaker.SetupSpeaker()
+			reply = "on"
+
+	elif (data[0:14] == "ClickOnSpeaker"):
+		if (GetAddedLirc() == 1):
+			irKey = gSpeaker.GetSpeakerKEYs(int(data[15:17]))
+			gSpeaker.SendIRSignal(irKey)
+			reply = "Speaker button " + data[15:17] + " pressed"
 
 	elif (data[0:18] == "EnableMotionDetect"):
 		if IsMotionSensorAdded():

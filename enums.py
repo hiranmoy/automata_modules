@@ -76,3 +76,47 @@ class ledButtons(Enum):
 	c22 = "KEY_V"
 	c23 = "KEY_W"
 	c24 = "KEY_X"
+
+
+# Speaker buttons
+class speakerButtons(Enum):
+	cPw = "KEY_POWER"
+	cMute = "KEY_MUTE"
+
+ 	c1 = "KEY_1"
+	c2 = "KEY_2"
+	c3 = "KEY_3"
+	c4 = "KEY_4"
+	c5 = "KEY_5"
+	c6 = "KEY_6"
+	c7 = "KEY_7"
+	c8 = "KEY_8"
+	c9 = "KEY_9"
+	c0 = "KEY_0"
+
+	cLight = "KEY_L"
+ 	cReset = "KEY_R"
+ 	cBt = "KEY_BLUETOOTH"
+ 	cUsb = "KEY_U"
+
+ 	cUp = "KEY_UP"
+	cDown = "KEY_DOWN"
+ 	cVolUp = "KEY_VOLUMEUP"
+	cVolDn = "KEY_VOLUMEDOWN"
+	cEn = "KEY_ENTER"
+
+	cAux = "KEY_AUX"
+	cRd = "KEY_RADIO"
+
+	cBack = "KEY_BACK"
+	cFwd = "KEY_FORWARD"
+	cPlPs = "KEY_PLAYPAUSE"
+
+	cTnUp = "BTN_TL"
+	cTnDn = "BTN_TL2"
+
+	cChUp = "KEY_CHANNELUP"
+	cChDn = "KEY_CHANNELDOWN"
+
+	cScan = "KEY_S"
+	cMem = "KEY_M"
