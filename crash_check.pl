@@ -38,6 +38,7 @@ use File::Copy;
 # global variables
 $dumpArea = "/home/pi/automation/dump/";
 $endFile = $dumpArea."end";
+$runningFile = $dumpArea."running";
 $scriptProcessIdFile = $dumpArea."crash_check_script.process";
 
 
@@ -73,6 +74,7 @@ sub main
 	# get automata python program
 	my $processId = GetProcessId();
 
+	my $timeInSec = 0.1;
 
 	while (1)
 	{
@@ -84,8 +86,29 @@ sub main
 		}
 
 		# check if the python program is running
-		my $checkIfRunning = `ps $processId | grep -c "automata\.py"`;
-		chomp $checkIfRunning;
+		my $checkIfRunning = "1";
+
+		if ($timeInSec >= 60)
+		{
+			$timeInSec = 0.0;
+			# exit if running file doesn't exist
+			if (! -e $runningFile)
+			{
+				$checkIfRunning = "0";
+			}
+			else
+			{
+				# delete running file
+				unlink $runningFile;
+			}
+		}
+
+		if ($checkIfRunning eq "1")
+		{
+			$checkIfRunning = `ps $processId | grep -c "automata\.py"`;
+			chomp $checkIfRunning;
+		}
+
 		if ($checkIfRunning ne "1")
 		{
 			# sleep for 3 sec
@@ -114,6 +137,7 @@ sub main
 
 		#print ".1 sec timer\n";
 		Time::HiRes::sleep(.1);
+		$timeInSec += 0.1;
 	}
 }
 
