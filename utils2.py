@@ -42,6 +42,7 @@ gBulb0 = Appliance(1, bulb0GPIO, "bulb0")
 gPlug1 = Appliance(1, plug1GPIO, "plug1")
 gLEDFlood = LEDFloodLight(1, ledFloodGPIO, "LED", "LED_flood_light")
 gSpeaker = Speaker(1, -1, "SPEAKER", "speaker")
+gAC = Speaker(1, -1, "AC", "ac")
 
 gTouchSensor = TouchSensor(1, touchGPIO, "Touch_sensor")
 gMotionSensor = MotionSensor(motionGPIO, "Motion_sensor")

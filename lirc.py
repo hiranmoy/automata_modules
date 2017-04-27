@@ -84,7 +84,8 @@ class Lirc(Appliance):
 			return
 
 		command = "sudo cp " + self.mConfig + " /etc/lirc/lircd.conf; " + \
-							"sudo /etc/init.d/lirc restart; " + \
+							"sudo /etc/init.d/lirc stop; " + \
+							"sudo /etc/init.d/lirc start; " + \
 							"sudo lircd -d /dev/lirc0"
 		os.system(command)
 
@@ -183,3 +184,45 @@ class Speaker(Lirc):
 			DumpActivity("incorrect speaker button number, assuming default value", color.cRed)
 
 		return speakerButton
+
+
+
+# ===========================	AC class	===========================
+class AC(Lirc):
+	def __init__(self, lircIdx, gpio, name, config):
+		# initalize Lirc class
+		Lirc.__init__(self, lircIdx, gpio, name, config)
+
+		# ir keys for ac buttons
+		self.mArr = ["KEY_POWER", "KEY_MUTE", \
+		             "KEY_1", "KEY_2", "KEY_3", "KEY_4", "KEY_5", "KEY_6", "KEY_7", "KEY_8", "KEY_9", "KEY_0", \
+		             "KEY_L", "KEY_R", "KEY_BLUETOOTH", "KEY_U", \
+		             "KEY_UP", "KEY_DOWN", "KEY_VOLUMEUP", "KEY_VOLUMEDOWN", "KEY_ENTER", \
+		             "KEY_AUX", "KEY_RADIO", \
+		             "KEY_BACK", "KEY_FORWARD", "KEY_PLAYPAUSE", \
+		             "BTN_TL", "BTN_TL2", \
+		             "KEY_CHANNELUP", "KEY_CHANNELDOWN" \
+		             "KEY_S", "KEY_M"]
+		
+
+	def SetupAC(self, on=1):
+		if (GetAddedLirc() != self.mLircId):
+			return
+
+		# basic setup
+		self.Setup(on)
+
+		DumpActivity("AC setup done", color.cGreen)
+
+
+	# convert button index to button name
+	def GetACKEYs(self, button):
+		# default: on (ON)
+		acButton = self.mArr[0]
+
+		if (button < 38):
+			acButton = self.mArr[button - 1]
+		else:
+			DumpActivity("incorrect ac button number, assuming default value", color.cRed)
+
+		return acButton
