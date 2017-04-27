@@ -194,16 +194,16 @@ class AC(Lirc):
 		Lirc.__init__(self, lircIdx, gpio, name, config)
 
 		# ir keys for ac buttons
-		self.mArr = ["KEY_POWER", "KEY_MUTE", \
-		             "KEY_1", "KEY_2", "KEY_3", "KEY_4", "KEY_5", "KEY_6", "KEY_7", "KEY_8", "KEY_9", "KEY_0", \
-		             "KEY_L", "KEY_R", "KEY_BLUETOOTH", "KEY_U", \
-		             "KEY_UP", "KEY_DOWN", "KEY_VOLUMEUP", "KEY_VOLUMEDOWN", "KEY_ENTER", \
-		             "KEY_AUX", "KEY_RADIO", \
-		             "KEY_BACK", "KEY_FORWARD", "KEY_PLAYPAUSE", \
-		             "BTN_TL", "BTN_TL2", \
-		             "KEY_CHANNELUP", "KEY_CHANNELDOWN" \
-		             "KEY_S", "KEY_M"]
-		
+		self.mArr = ["ON", "OFF" \
+		             "FAN_1_SWOFF", "FAN_2_SWOFF", "FAN_3_SWOFF", \
+		             "FAN_1_SWON", "FAN_2_SWON", "FAN_3_SWON", \
+		             "DRY_16_SWOFF", "DRY_17_SWOFF", "DRY_18_SWOFF", "DRY_19_SWOFF", "DRY_20_SWOFF", \
+		             "DRY_21_SWOFF", "DRY_22_SWOFF", "DRY_23_SWOFF", "DRY_24_SWOFF", "DRY_25_SWOFF", \
+		             "DRY_26_SWOFF", "DRY_27_SWOFF", "DRY_28_SWOFF", "DRY_29_SWOFF", "DRY_30_SWOFF", \
+		             "DRY_16_SWON", "DRY_17_SWON", "DRY_18_SWON", "DRY_19_SWON", "DRY_20_SWON", \
+		             "DRY_21_SWON", "DRY_22_SWON", "DRY_23_SWON", "DRY_24_SWON", "DRY_25_SWON", \
+		             "DRY_26_SWON", "DRY_27_SWON", "DRY_28_SWON", "DRY_29_SWON", "DRY_30_SWON"]
+
 
 	def SetupAC(self, on=1):
 		if (GetAddedLirc() != self.mLircId):
