@@ -205,16 +205,20 @@ def CloseTcpConnection():
 def ConnectAndCloseConnection():
 	global gDataReceived, gConnected, gConnection
 
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	try:
-		s.connect((gHost, gPort))
-		s.close()
+	if (gConnection != None):
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		try:
+			s.connect((gHost, gPort))
+			s.close()
 
-		gConnected = 0
-		gDataReceived = 0
-		gConnection = None
-	except:
-		DumpActivity("Unable to connect and close tcp", color.cRed)
+			gConnected = 0
+			gDataReceived = 0
+			gConnection = None
+		except:
+			DumpActivity("Unable to connect and close tcp", color.cRed)
+			KillTcp()
+	else:
+		DumpActivity("Killing tcp since there is no connection", color.cRed)
 		KillTcp()
 
 
@@ -436,6 +440,8 @@ def GetTcpReply(data):
 
 # ===================================	timer	===================================
 def MonitorTcpConnection():
+	global gDataReceived
+
 	timeInSec = 0
 	timeInMin = 0.0
 
@@ -463,9 +469,10 @@ def MonitorTcpConnection():
 				if (gDataReceived == 0) and (gConnection != None):
 					DumpActivity("Killing tcp connection after not received any response from client for 2 min", color.cPink)
 					KillTcp()
+				gDataReceived = 0
 
-			elif (timeInMin >= 10):
-				DumpActivity("Starting new tcp connection after not connecting to any client for 10 min", color.cPink)
+			elif (timeInMin >= 5):
+				DumpActivity("Starting new tcp connection after not connecting to any client for 5 min", color.cPink)
 				ConnectAndCloseConnection()
 				timeInMin = 0.0
 
