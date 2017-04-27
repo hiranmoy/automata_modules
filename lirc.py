@@ -84,7 +84,8 @@ class Lirc(Appliance):
 			return
 
 		command = "sudo cp " + self.mConfig + " /etc/lirc/lircd.conf; " + \
-							"sudo /etc/init.d/lirc restart; " + \
+							"sudo /etc/init.d/lirc stop; " + \
+							"sudo /etc/init.d/lirc start; " + \
 							"sudo lircd -d /dev/lirc0"
 		os.system(command)
 
@@ -108,6 +109,14 @@ class LEDFloodLight(Lirc):
 		# initalize Lirc class
 		Lirc.__init__(self, lircIdx, gpio, name, config)
 		
+		# ir keys for LED buttons
+		self.mArr = ["KEY_A", "KEY_B", "KEY_C", "KEY_D", \
+		             "KEY_E", "KEY_F", "KEY_G", "KEY_H", \
+		             "KEY_I", "KEY_J", "KEY_K", "KEY_L", \
+		             "KEY_M", "KEY_N", "KEY_O", "KEY_P", \
+		             "KEY_Q", "KEY_R", "KEY_S", "KEY_T", \
+		             "KEY_U", "KEY_V", "KEY_W", "KEY_X"]
+
 
 	def SetupLEDFloodLight(self, on=1):
 		if (GetAddedLirc() != self.mLircId):
@@ -124,61 +133,15 @@ class LEDFloodLight(Lirc):
 
 	# convert button index to button name
 	def GetLEDKEYs(self, button):
-		# default on (ledButtons.c4)
-		ledButton = ledButtons.c4
+		# default: off (KEY_C)
+		ledButton = self.mArr[2]
 
-		if (button == 1):
-			ledButton = ledButtons.c1
-		elif (button == 2):
-			ledButton = ledButtons.c2
-		elif (button == 3):
-			ledButton = ledButtons.c3
-		elif (button == 4):
-			ledButton = ledButtons.c4
-		elif (button == 5):
-			ledButton = ledButtons.c5
-		elif (button == 6):
-			ledButton = ledButtons.c6
-		elif (button == 7):
-			ledButton = ledButtons.c7
-		elif (button == 8):
-			ledButton = ledButtons.c8
-		elif (button == 9):
-			ledButton = ledButtons.c9
-		elif (button == 10):
-			ledButton = ledButtons.c10
-		elif (button == 11):
-			ledButton = ledButtons.c11
-		elif (button == 12):
-			ledButton = ledButtons.c12
-		elif (button == 13):
-			ledButton = ledButtons.c13
-		elif (button == 14):
-			ledButton = ledButtons.c14
-		elif (button == 15):
-			ledButton = ledButtons.c15
-		elif (button == 16):
-			ledButton = ledButtons.c16
-		elif (button == 17):
-			ledButton = ledButtons.c17
-		elif (button == 18):
-			ledButton = ledButtons.c18
-		elif (button == 19):
-			ledButton = ledButtons.c19
-		elif (button == 20):
-			ledButton = ledButtons.c20
-		elif (button == 21):
-			ledButton = ledButtons.c21
-		elif (button == 22):
-			ledButton = ledButtons.c22
-		elif (button == 23):
-			ledButton = ledButtons.c23
-		elif (button == 24):
-			ledButton = ledButtons.c24
+		if (button < 24):
+			ledButton = self.mArr[button - 1]
 		else:
 			DumpActivity("incorrect LED button number, assuming default value", color.cRed)
 
-		return ledButton.value
+		return ledButton
 
 
 
@@ -187,6 +150,17 @@ class Speaker(Lirc):
 	def __init__(self, lircIdx, gpio, name, config):
 		# initalize Lirc class
 		Lirc.__init__(self, lircIdx, gpio, name, config)
+
+		# ir keys for speaker buttons
+		self.mArr = ["KEY_POWER", "KEY_MUTE", \
+		             "KEY_1", "KEY_2", "KEY_3", "KEY_4", "KEY_5", "KEY_6", "KEY_7", "KEY_8", "KEY_9", "KEY_0", \
+		             "KEY_L", "KEY_R", "KEY_BLUETOOTH", "KEY_U", \
+		             "KEY_UP", "KEY_DOWN", "KEY_VOLUMEUP", "KEY_VOLUMEDOWN", "KEY_ENTER", \
+		             "KEY_AUX", "KEY_RADIO", \
+		             "KEY_BACK", "KEY_FORWARD", "KEY_PLAYPAUSE", \
+		             "BTN_TL", "BTN_TL2", \
+		             "KEY_CHANNELUP", "KEY_CHANNELDOWN" \
+		             "KEY_S", "KEY_M"]
 		
 
 	def SetupSpeaker(self, on=1):
@@ -201,74 +175,54 @@ class Speaker(Lirc):
 
 	# convert button index to button name
 	def GetSpeakerKEYs(self, button):
-		# default on (speakerButtons.cAux)
-		speakerButton = speakerButtons.cAux
+		# default: aux (KEY_AUX)
+		speakerButton = self.mArr[21]
 
-		if (button == 1):
-			speakerButton = speakerButtons.cPw
-		elif (button == 2):
-			speakerButton = speakerButtons.cMute
-		elif (button == 3):
-			speakerButton = speakerButtons.c1
-		elif (button == 4):
-			speakerButton = speakerButtons.c2
-		elif (button == 5):
-			speakerButton = speakerButtons.c3
-		elif (button == 6):
-			speakerButton = speakerButtons.c4
-		elif (button == 7):
-			speakerButton = speakerButtons.c5
-		elif (button == 8):
-			speakerButton = speakerButtons.c6
-		elif (button == 9):
-			speakerButton = speakerButtons.c7
-		elif (button == 10):
-			speakerButton = speakerButtons.c8
-		elif (button == 11):
-			speakerButton = speakerButtons.c9
-		elif (button == 12):
-			speakerButton = speakerButtons.c0
-		elif (button == 13):
-			speakerButton = speakerButtons.cLight
-		elif (button == 14):
-			speakerButton = speakerButtons.cReset
-		elif (button == 15):
-			speakerButton = speakerButtons.cBt
-		elif (button == 16):
-			speakerButton = speakerButtons.cUsb
-		elif (button == 17):
-			speakerButton = speakerButtons.cUp
-		elif (button == 18):
-			speakerButton = speakerButtons.cDown
-		elif (button == 19):
-			speakerButton = speakerButtons.cVolUp
-		elif (button == 20):
-			speakerButton = speakerButtons.cVolDn
-		elif (button == 21):
-			speakerButton = speakerButtons.cEn
-		elif (button == 22):
-			speakerButton = speakerButtons.cAux
-		elif (button == 23):
-			speakerButton = speakerButtons.cRd
-		elif (button == 24):
-			speakerButton = speakerButtons.cBack
-		elif (button == 25):
-			speakerButton = speakerButtons.cFwd
-		elif (button == 26):
-			speakerButton = speakerButtons.cPlPs
-		elif (button == 27):
-			speakerButton = speakerButtons.cTnUp
-		elif (button == 28):
-			speakerButton = speakerButtons.cTnDn
-		elif (button == 29):
-			speakerButton = speakerButtons.cChUp
-		elif (button == 30):
-			speakerButton = speakerButtons.cChDn
-		elif (button == 31):
-			speakerButton = speakerButtons.cScan
-		elif (button == 32):
-			speakerButton = speakerButtons.cMem
+		if (button < 32):
+			speakerButton = self.mArr[button - 1]
 		else:
 			DumpActivity("incorrect speaker button number, assuming default value", color.cRed)
 
-		return speakerButton.value
+		return speakerButton
+
+
+
+# ===========================	AC class	===========================
+class AC(Lirc):
+	def __init__(self, lircIdx, gpio, name, config):
+		# initalize Lirc class
+		Lirc.__init__(self, lircIdx, gpio, name, config)
+
+		# ir keys for ac buttons
+		self.mArr = ["KEY_POWER", "KEY_MUTE", \
+		             "KEY_1", "KEY_2", "KEY_3", "KEY_4", "KEY_5", "KEY_6", "KEY_7", "KEY_8", "KEY_9", "KEY_0", \
+		             "KEY_L", "KEY_R", "KEY_BLUETOOTH", "KEY_U", \
+		             "KEY_UP", "KEY_DOWN", "KEY_VOLUMEUP", "KEY_VOLUMEDOWN", "KEY_ENTER", \
+		             "KEY_AUX", "KEY_RADIO", \
+		             "KEY_BACK", "KEY_FORWARD", "KEY_PLAYPAUSE", \
+		             "BTN_TL", "BTN_TL2", \
+		             "KEY_CHANNELUP", "KEY_CHANNELDOWN" \
+		             "KEY_S", "KEY_M"]
+		
+
+	def SetupAC(self, on=1):
+		if (GetAddedLirc() != self.mLircId):
+			return
+
+		# basic setup
+		self.Setup(on)
+
+		DumpActivity("AC setup done", color.cGreen)
+
+
+	# convert button index to button name
+	def GetACKEYs(self, button):
+		# default: on (ON)
+		acButton = self.mArr[0]
+
+		if (button < 38):
+			acButton = self.mArr[button - 1]
+		else:
+			DumpActivity("incorrect ac button number, assuming default value", color.cRed)
+
+		return acButton
