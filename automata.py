@@ -57,7 +57,7 @@ gTimer1MinThread = threading.Thread(target=Timer1Min)
 # ===================================	functions	================================
 def OnClosing():
 	# switch off bluetooth speaker and all appliances
-	ClearGPIO()
+	# ClearGPIO()
 
 	# stop tcp thread
 	ExitThread()
