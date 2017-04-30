@@ -41,8 +41,6 @@ GPIO.setmode(GPIO.BCM)
 motionGPIO = 5
 touchGPIO = 25
 
-#bluetoothGPIO = 16
-
 lightGPIO = 21
 fluLightGPIO = 26
 plug0GPIO = 20
@@ -66,10 +64,6 @@ def SetupGPIOs():
 	if (GetAddedTouchSensor() == 1):
 		# Touch sensor input (active high)
 		GPIO.setup(touchGPIO, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-
-
-	# Bluetooth enable control (active high)
-	#GPIO.setup(bluetoothGPIO, GPIO.OUT)
 
 
 	if (GetAddedLightings() == 1):
@@ -107,8 +101,6 @@ def SetupGPIOs():
 
 # clear all GPIOs
 def ClearGPIO():
-	#GPIO.output(bluetoothGPIO, False)
-
 	if (GetAddedLightings() == 1):
 		GPIO.output(fanGPIO, False)
 		GPIO.output(balconyLightGPIO, False)

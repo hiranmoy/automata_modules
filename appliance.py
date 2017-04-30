@@ -59,11 +59,11 @@ class Appliance():
 
 
 	def SetPoweredOnOnly(self, on=1):
-		# some devices are always powered on
+		self.mPoweredOn = on
+
+		# some devices are not controlled by GPIO
 		if (self.mGPIO < 0):
 			return
-
-		self.mPoweredOn = on
 
 		if (self.mPoweredOn):
 			GPIO.output(self.mGPIO, True)
@@ -96,7 +96,7 @@ class Appliance():
 
 
 	def UpdateSwitchedProfile(self):
-		if (GetAddedLightings() != self.mId and -1):
+		if ((GetAddedLightings() != self.mId) and (self.mId != -1)):
 			return
 
 		if self.mPoweredOn:

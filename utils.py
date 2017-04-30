@@ -38,7 +38,6 @@ from enums import *
 
 gDisableVideo = 0
 gDisableAudio = 0
-#gEnableBluetooth = 0
 
 gAddMotionSensor = 0
 gAddCamera = 0
@@ -203,16 +202,6 @@ def SetDisableAudio(val=1):
 
 	global gDisableAudio
 	gDisableAudio= val
-
-
-#def SetBluetooth(val):
-#	global gEnableBluetooth
-#	gEnableBluetooth = val
-
-#	if (gEnableBluetooth):
-#		GPIO.output(bluetoothGPIO, True)
-#	else:
-#		GPIO.output(bluetoothGPIO, False)
 
 
 def AddMotionSensor(add=1):

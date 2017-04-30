@@ -42,7 +42,7 @@ gBulb0 = Appliance(1, bulb0GPIO, "bulb0")
 gPlug1 = Appliance(1, plug1GPIO, "plug1")
 gLEDFlood = LEDFloodLight(0, 1, ledFloodGPIO, "LED", "LED_flood_light")
 gSpeaker = Speaker(1, 1, -1, "SPEAKER", "speaker")
-gAC = Speaker(2, 1, -1, "AC", "ac")
+gAC = AC(2, 1, -1, "AC", "ac")
 
 gTouchSensor = TouchSensor(1, touchGPIO, "Touch_sensor")
 gMotionSensor = MotionSensor(motionGPIO, "Motion_sensor")
@@ -71,10 +71,10 @@ def IsExitTread():
 def SaveSettings():
 	pSettingsFile = open(GetSettingsFile(), "w")
 
-	pSettingsFile.write(str(gMotionSensor.IsEnabled()) + "    : Enable Motion Sensor\n")			# 1
-	pSettingsFile.write(str(GetIsDisableVideo()) + "    : Disable Video\n")										# 2
-	pSettingsFile.write(str(GetIsDisableAudio()) + "    : Disable Audio\n")										# 3
-	#pSettingsFile.write(str(gEnableBluetooth) + "    : Enable Bluetooth\n")									
+	pSettingsFile.write(str(gMotionSensor.IsEnabled()) + "            : Enable Motion Sensor\n")			# 1
+	pSettingsFile.write(str(GetIsDisableVideo()) + "            : Disable Video\n")										# 2
+	pSettingsFile.write(str(GetIsDisableAudio()) + "            : Disable Audio\n")										# 3
+	pSettingsFile.write(str(gAC.GetSetting()) + "            : AC settings\n")												# 4
 
 	pSettingsFile.close()
 
@@ -89,6 +89,7 @@ def SaveProfileOfAllAppliances():
 	gBulb0.SaveProfile(pProfileFile)								# 5
 	gPlug1.SaveProfile(pProfileFile)								# 6
 	gLEDFlood.SaveProfile(pProfileFile)							# 7
+	gAC.SaveProfile(pProfileFile)										# 8
 
 	pProfileFile.close()
 
@@ -136,6 +137,9 @@ def RestoreProfileOfAll():
 
 		if (lineNum == 7):
 			gLEDFlood.RestoreProfile(line)
+
+		if (lineNum == 8):
+			gAC.RestoreProfile(line)
 
 	pProfileFile.close()
 
@@ -351,15 +355,18 @@ def Timer1Min():
 			gTouchSensor.ClearTriggeredStatus()
 
 			if (GetAddedLightings() == 1):
-				gFluLight.UpdateSwitchedProfile()
-				gPlug0.UpdateSwitchedProfile()
 				gFan.UpdateSwitchedProfile()
 				gBalconyLight.UpdateSwitchedProfile()
 				gBulb0.UpdateSwitchedProfile()
 				gPlug1.UpdateSwitchedProfile()
 
+			if (GetAddedLightings() == 2):
+				gFluLight.UpdateSwitchedProfile()
+				gPlug0.UpdateSwitchedProfile()
+
 			if (GetAddedLirc() == 1):
 				gLEDFlood.UpdateSwitchedProfile()
+				gAC.UpdateSwitchedProfile()
 
 			if IsSenseHatAdded():
 				gWeather.UpdateReadings()

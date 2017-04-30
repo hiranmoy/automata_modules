@@ -108,7 +108,7 @@ def RestoreSettings():
 	lineNum = 0
 	for line in pSettingsFile:
 		lineNum += 1
-		val = line[0:4]
+		val = line[0:12]
 
 		if (lineNum == 1):
 			# Enable Motion Detection
@@ -122,9 +122,12 @@ def RestoreSettings():
 			# Disable Audio
 			SetDisableAudio(int(val))
 
-		#elif (lineNum == 4):
-		#	Enable Bluetooth
-		#	SetBluetooth(int(val))
+		elif (lineNum == 4):
+			#	ac setting
+			if (val[1] == " "):
+				gAC.SetSetting(val[0])
+			else:
+				gAC.SetSetting(val)
 
 		else:
 			pSettingsFile.close()
