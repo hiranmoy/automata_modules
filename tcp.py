@@ -65,14 +65,15 @@ def KillTcp():
 
 
 def StartTcp():
-	global gDataReceived, gConnection
+	global gDataReceived, gConnection, gConnection
 
 	bindFailed = 1
 	while bindFailed:
 		bindFailed = StartSocket()
 
-		gConnection = None
+		gConnected = 0
 		gDataReceived = 0
+		gConnection = None
 
 		# wait for 10 sec before trying a socket connection
 		time.sleep(10)
@@ -81,14 +82,19 @@ def StartTcp():
 
 
 def StartSocket():
-	global gConnected, gDataReceived, gConnection
+	global gConnected, gConnection
 	gConnected = 0
 	gConnection = None
 
 
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	DumpActivity("Socket created", color.cWhite)
-
+	# create socket
+	try:
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		DumpActivity("Socket created", color.cWhite)
+	except:
+		DumpActivity("Socket creation failed", color.cRed)
+		return 1
+	
 
 	# managing error exception
 	try:
@@ -128,8 +134,8 @@ def StartSocket():
 		data = ""
 		if (((numData % 2) != 1) or (numData < 3)):
 			DumpActivity("Incorrect tcp data format : " + tcpData, color.cRed)
-			CloseTcpConnection()
-			return 1
+			time.sleep(0.1)
+			continue
 		else:
 			for idx in range(0, (numData - 2), 2):
 				key = dataArr[idx]
@@ -479,7 +485,7 @@ def MonitorTcpConnection():
 			if gConnected:
 				if (gDataReceived == 0) and (gConnection != None):
 					DumpActivity("Killing tcp connection after not received any response from client for 2 min", color.cPink)
-					KillTcp()
+					ConnectAndCloseConnection()
 				gDataReceived = 0
 
 			elif (timeInMin >= 5):
