@@ -334,14 +334,9 @@ def GetTcpReply(data):
 		if (GetAddedLightings() == 1):
 			reply = str(gPlug1.CheckIfOn())
 
-	elif (data == "SetupLEDFloodLight"):
-		if (GetAddedLirc() == 1):
-			gLEDFlood.SetupLEDFloodLight()
-			reply = "on"
-
 	elif (data == "SwitchOffLEDFloodLight"):
 		if (GetAddedLirc() == 1):
-			gLEDFlood.SetupLEDFloodLight(0)
+			gLEDFlood.SetPoweredOn(0)
 			reply = "off"
 
 	elif (data[0:20] == "ClickOnLEDFloodLight"):
@@ -350,27 +345,17 @@ def GetTcpReply(data):
 			gLEDFlood.SendIRSignal(irKey)
 			reply = "LED Flood Light button " + data[21:23] + " pressed"
 
-	elif (data == "SetupSpeaker"):
-		if (GetAddedLirc() == 1):
-			gSpeaker.SetupSpeaker()
-			reply = "on"
-
 	elif (data[0:14] == "ClickOnSpeaker"):
 		if (GetAddedLirc() == 1):
 			irKey = gSpeaker.GetSpeakerKEYs(int(data[15:17]))
 			gSpeaker.SendIRSignal(irKey)
 			reply = "Speaker button " + data[15:17] + " pressed"
 
-	elif (data == "SetupAC"):
-		if (GetAddedLirc() == 1):
-			gAC.SetupAC()
-			reply = "on"
-
 	elif (data[0:9] == "ClickOnAC"):
 		if (GetAddedLirc() == 1):
-			irKey = gAC.GetACKEYs(int(data[10:12]))
+			irKey = gAC.GetACKEYs(int(data[10:]))
 			gAC.SendIRSignal(irKey)
-			reply = "AC button " + data[10:12] + " pressed"
+			reply = "AC button " + data[10:] + " pressed"
 
 	elif (data[0:18] == "EnableMotionDetect"):
 		if IsMotionSensorAdded():

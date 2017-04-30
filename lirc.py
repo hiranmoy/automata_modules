@@ -32,15 +32,22 @@
 from appliance import *
 
 
+# id of the enabled lirc
+gLircsEnabled = -1
+
+
 
 # =================================	Lirc class	=================================
 class Lirc(Appliance):
-	def __init__(self, lircIdx, gpio, name, config):
+	def __init__(self, lircIdx, lircModuleIdx, gpio, name, config):
 		# initalize Appliance class
 		Appliance.__init__(self, -1, gpio, name)
 
 		# lirc id
 		self.mLircId = lircIdx
+
+		# lirc module id
+		self.mLircModuleId = lircModuleIdx
 
 		# Lirc name
 		self.mIRName = name
@@ -51,7 +58,7 @@ class Lirc(Appliance):
 
 	# virtual
 	def SetPoweredOn(self, on=1):
-		if (GetAddedLirc() != self.mLircId):
+		if (GetAddedLirc() != self.mLircModuleId):
 			return
 
 		self.SetPoweredOnOnly(on)
@@ -59,7 +66,7 @@ class Lirc(Appliance):
 
 	# virtual
 	def SaveProfile(self, pProfileFile):
-		if (GetAddedLirc() != self.mLircId):
+		if (GetAddedLirc() != self.mLircModuleId):
 			pProfileFile.write("\n")
 			return
 
@@ -68,14 +75,16 @@ class Lirc(Appliance):
 
 	# virtual
 	def RestoreProfile(self, lineInput):
-		if (GetAddedLirc() != self.mLircId):
+		if (GetAddedLirc() != self.mLircModuleId):
 			return
 
 		self.RestoreProfileOnly(lineInput)
 
 
 	def Setup(self, on):
-		if (GetAddedLirc() != self.mLircId):
+		global gLircsEnabled
+
+		if (GetAddedLirc() != self.mLircModuleId):
 			return
 
 		self.SetPoweredOn(on)
@@ -83,19 +92,26 @@ class Lirc(Appliance):
 		if (on == 0):
 			return
 
-		command = "sudo cp " + self.mConfig + " /etc/lirc/lircd.conf; " + \
-							"sudo /etc/init.d/lirc stop; " + \
-							"sudo /etc/init.d/lirc start; " + \
-							"sudo lircd -d /dev/lirc0"
-		os.system(command)
 
-		# wait for 1 sec
-		time.sleep(1)
+		if (self.mLircId != gLircsEnabled):
+			command = "sudo cp " + self.mConfig + " /etc/lirc/lircd.conf; " + \
+								"sudo /etc/init.d/lirc stop; " + \
+								"sudo /etc/init.d/lirc start; " + \
+								"sudo lircd -d /dev/lirc0"
+			os.system(command)
+
+			# wait for 1 sec
+			#time.sleep(1)
+
+			gLircsEnabled = self.mLircId
 
 
 	def SendIRSignal(self, signalEnum):
-		if (GetAddedLirc() != self.mLircId):
+		if (GetAddedLirc() != self.mLircModuleId):
 			return
+
+		# basic setup
+		self.Setup(1)
 
 		command = "irsend SEND_ONCE " + self.mIRName + " " + signalEnum
 		os.system(command)
@@ -105,10 +121,10 @@ class Lirc(Appliance):
 
 # ===========================	LED Flood Light class	===========================
 class LEDFloodLight(Lirc):
-	def __init__(self, lircIdx, gpio, name, config):
+	def __init__(self, lircIdx, lircModuleIdx, gpio, name, config):
 		# initalize Lirc class
-		Lirc.__init__(self, lircIdx, gpio, name, config)
-		
+		Lirc.__init__(self, lircIdx, lircModuleIdx, gpio, name, config)
+
 		# ir keys for LED buttons
 		self.mArr = ["KEY_A", "KEY_B", "KEY_C", "KEY_D", \
 		             "KEY_E", "KEY_F", "KEY_G", "KEY_H", \
@@ -118,18 +134,17 @@ class LEDFloodLight(Lirc):
 		             "KEY_U", "KEY_V", "KEY_W", "KEY_X"]
 
 
-	def SetupLEDFloodLight(self, on=1):
-		if (GetAddedLirc() != self.mLircId):
+	# virtual
+	def RestoreProfile(self, lineInput):
+		if (GetAddedLirc() != self.mLircModuleId):
 			return
 
-		# basic setup
-		self.Setup(on)
+		self.RestoreProfileOnly(lineInput)
 
-		# press on "off" button (3)
-		self.SendIRSignal(self.GetLEDKEYs(3))
-
-		DumpActivity("LED flood light setup done", color.cGreen)
-
+		if self.CheckIfOn():
+			# press on "off" button (3) if switched on
+			self.SendIRSignal(self.GetLEDKEYs(3))
+	
 
 	# convert button index to button name
 	def GetLEDKEYs(self, button):
@@ -147,9 +162,9 @@ class LEDFloodLight(Lirc):
 
 # ===========================	Speaker class	===========================
 class Speaker(Lirc):
-	def __init__(self, lircIdx, gpio, name, config):
+	def __init__(self, lircIdx, lircModuleIdx, gpio, name, config):
 		# initalize Lirc class
-		Lirc.__init__(self, lircIdx, gpio, name, config)
+		Lirc.__init__(self, lircIdx, lircModuleIdx, gpio, name, config)
 
 		# ir keys for speaker buttons
 		self.mArr = ["KEY_POWER", "KEY_MUTE", \
@@ -164,7 +179,7 @@ class Speaker(Lirc):
 		
 
 	def SetupSpeaker(self, on=1):
-		if (GetAddedLirc() != self.mLircId):
+		if (GetAddedLirc() != self.mLircModuleId):
 			return
 
 		# basic setup
@@ -189,9 +204,9 @@ class Speaker(Lirc):
 
 # ===========================	AC class	===========================
 class AC(Lirc):
-	def __init__(self, lircIdx, gpio, name, config):
+	def __init__(self, lircIdx, lircModuleIdx, gpio, name, config):
 		# initalize Lirc class
-		Lirc.__init__(self, lircIdx, gpio, name, config)
+		Lirc.__init__(self, lircIdx, lircModuleIdx, gpio, name, config)
 
 		# ir keys for ac buttons
 		self.mArr = ["ON", "OFF" \
@@ -206,7 +221,7 @@ class AC(Lirc):
 
 
 	def SetupAC(self, on=1):
-		if (GetAddedLirc() != self.mLircId):
+		if (GetAddedLirc() != self.mLircModuleId):
 			return
 
 		# basic setup

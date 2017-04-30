@@ -40,9 +40,9 @@ gFan = Appliance(1, fanGPIO, "fan")
 gBalconyLight = Appliance(1, balconyLightGPIO, "balconyLight")
 gBulb0 = Appliance(1, bulb0GPIO, "bulb0")
 gPlug1 = Appliance(1, plug1GPIO, "plug1")
-gLEDFlood = LEDFloodLight(1, ledFloodGPIO, "LED", "LED_flood_light")
-gSpeaker = Speaker(1, -1, "SPEAKER", "speaker")
-gAC = Speaker(1, -1, "AC", "ac")
+gLEDFlood = LEDFloodLight(0, 1, ledFloodGPIO, "LED", "LED_flood_light")
+gSpeaker = Speaker(1, 1, -1, "SPEAKER", "speaker")
+gAC = Speaker(2, 1, -1, "AC", "ac")
 
 gTouchSensor = TouchSensor(1, touchGPIO, "Touch_sensor")
 gMotionSensor = MotionSensor(motionGPIO, "Motion_sensor")
@@ -136,9 +136,6 @@ def RestoreProfileOfAll():
 
 		if (lineNum == 7):
 			gLEDFlood.RestoreProfile(line)
-
-			# press on "off" button (3) if switched on
-			gLEDFlood.SendIRSignal(gLEDFlood.GetLEDKEYs(3))
 
 	pProfileFile.close()
 
