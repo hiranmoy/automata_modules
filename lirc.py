@@ -175,7 +175,7 @@ class Speaker(Lirc):
 		             "KEY_AUX", "KEY_RADIO", \
 		             "KEY_BACK", "KEY_FORWARD", "KEY_PLAYPAUSE", \
 		             "BTN_TL", "BTN_TL2", \
-		             "KEY_CHANNELUP", "KEY_CHANNELDOWN" \
+		             "KEY_CHANNELUP", "KEY_CHANNELDOWN", \
 		             "KEY_S", "KEY_M"]
 
 
@@ -184,7 +184,7 @@ class Speaker(Lirc):
 		# default: aux (KEY_AUX)
 		speakerButton = self.mArr[21]
 
-		if (button < 32):
+		if (button < 33):
 			speakerButton = self.mArr[button - 1]
 		else:
 			DumpActivity("incorrect speaker button number, assuming default value", color.cRed)
