@@ -199,13 +199,21 @@ def SendTcpMessage(key, reply, idx=-1):
 
 def CloseTcpConnection():
 	global gDataReceived, gConnected
-	
-	# Close connections
-	gConnection.close()
-	DumpActivity("Tcp connection terminated", color.cWhite)
 
-	gConnected = 0
-	gDataReceived = 0
+	if (gConnection != None):
+		try:
+			# Close connections
+			gConnection.close()
+			DumpActivity("Tcp connection terminated", color.cWhite)
+
+			gConnected = 0
+			gDataReceived = 0
+		except:
+			DumpActivity("Unable to close tcp", color.cRed)
+			KillTcp()
+	else:
+		DumpActivity("Killing tcp since there is no connection", color.cRed)
+		KillTcp()
 
 
 def ConnectAndCloseConnection():
