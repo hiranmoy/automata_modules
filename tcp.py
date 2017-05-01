@@ -127,7 +127,7 @@ def StartSocket():
 			return 1
 
 		# split tcpData into key and data based '#' char
-		# tcpData = <key>#<data>
+		# tcpData = <key>#<data>#
 		dataArr = tcpData.split('#')
 		numData = dataArr.__len__()
 		key = ""
@@ -224,6 +224,7 @@ def ConnectAndCloseConnection():
 		try:
 			s.connect((gHost, gPort))
 			s.close()
+			DumpActivity("Tcp port closed", color.cWhite)
 
 			gConnected = 0
 			gDataReceived = 0
@@ -231,9 +232,9 @@ def ConnectAndCloseConnection():
 		except:
 			DumpActivity("Unable to connect and close tcp", color.cRed)
 			KillTcp()
-	else:
-		DumpActivity("Killing tcp since there is no connection", color.cRed)
-		KillTcp()
+	
+	DumpActivity("Killing tcp since there is no connection", color.cRed)
+	KillTcp()
 
 
 def GetTcpReply(data):
@@ -482,12 +483,12 @@ def MonitorTcpConnection():
 			if gConnected:
 				if (gDataReceived == 0) and (gConnection != None):
 					DumpActivity("Killing tcp connection after not received any response from client for 2 min", color.cPink)
-					ConnectAndCloseConnection()
+					KillTcp()
 				gDataReceived = 0
 
 			elif (timeInMin >= 5):
 				DumpActivity("Starting new tcp connection after not connecting to any client for 5 min", color.cPink)
-				ConnectAndCloseConnection()
+				KillTcp()
 				timeInMin = 0.0
 
 
