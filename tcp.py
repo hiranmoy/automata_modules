@@ -156,22 +156,20 @@ def StartSocket():
 					DumpActivity(str(numReplies) + " Messages are being sent back in response to: " + tcpData, color.cWhite)
 					for idx in range(numReplies):
 						partReply = profileArr[idx]
-						success = SendTcpMessage(key, partReply, idx)
+						success = SendTcpMessage(key, partReply, tcpData, idx)
 						if (success == 0):
 							return 1
 
 					DumpActivity(str(numReplies) + " Messages sent back in response to: " + tcpData, color.cWhite)
 				else:
-					success = SendTcpMessage(key, reply)
+					success = SendTcpMessage(key, reply, tcpData)
 					if (success == 0):
 							return 1
-
-					DumpActivity("Message: " + reply + " sent back in response to: " + tcpData + " at " + CurDateTimeStr(), color.cCyan)
 
 	return 1
 
 
-def SendTcpMessage(key, reply, idx=-1):
+def SendTcpMessage(key, reply, tcpData, idx=-1):
 	global gDataReceived
 
 	# tcp reply	= #<key>=<reply>~
@@ -189,7 +187,10 @@ def SendTcpMessage(key, reply, idx=-1):
 		gDataReceived = 1
 
 		if (key[0] == "-"):
-			DumpActivity("Message: " + reply + " sent back (key):" + str(key) + " at " + CurDateTimeStr(), color.cWhite)
+			DumpActivity("Message: " + tcpReply + " sent back (key):" + str(key) + "in response to: " + tcpData + " at " + CurDateTimeStr(), color.cWhite)
+		elif (idx == -1):
+			DumpActivity("Message: " + tcpReply + " sent back in response to: " + tcpData + " at " + CurDateTimeStr(), color.cCyan)
+
 		return 1
 	except:
 		DumpActivity("Connection interrupted due to not able to send data", color.cRed)
