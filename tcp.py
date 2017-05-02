@@ -122,7 +122,7 @@ def StartSocket():
 		try:
 			tcpData = gConnection.recv(64)
 		except:
-			DumpActivity("Connection interrupted", color.cRed)
+			DumpActivity("Connection interrupted due to not able to receive data", color.cRed)
 			CloseTcpConnection()
 			return 1
 
@@ -192,7 +192,7 @@ def SendTcpMessage(key, reply, idx=-1):
 			DumpActivity("Message: " + reply + " sent back (key):" + str(key) + " at " + CurDateTimeStr(), color.cWhite)
 		return 1
 	except:
-		DumpActivity("Connection interrupted", color.cRed)
+		DumpActivity("Connection interrupted due to not able to send data", color.cRed)
 		CloseTcpConnection()
 		return 0
 
