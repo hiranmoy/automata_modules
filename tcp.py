@@ -170,7 +170,7 @@ def StartSocket():
 
 
 def SendTcpMessage(key, reply, tcpData, idx=-1):
-	global gDataReceived
+	global gDataReceived, gConnection
 
 	# tcp reply	= #<key>=<reply>~
 	# 			 or = #<key>=<packet index>|<part reply>~
@@ -459,7 +459,7 @@ def MonitorTcpConnection():
 	global gDataReceived
 
 	timeInSec = 0
-	timeInMin = 0.0
+	timeTillNodataReceived = 0
 
 	while(1):
 		if IsExitTread():
@@ -468,29 +468,34 @@ def MonitorTcpConnection():
 		time.sleep(1)
 		timeInSec += 1
 
-		if ((timeInSec % 30) == 0):
+		# create empty file "running" at every 30 sec
+		if (timeInSec == 30):
+			timeInSec = 0
 			# create empty file name "running"
 			command = "touch " + GetDumpArea() + "running"
 			os.system(command)
 
-		if (timeInSec == 60):
-			timeInSec = 0
-			timeInMin += 1
+		if gDataReceived:
+			gDataReceived = 0
+			timeTillNodataReceived = 0
+		else:
+			timeTillNodataReceived += 1
 
+		if (timeTillNodataReceived >= 60):
 			if IsDebugMode():
 				# debug mode
 				continue
 
 			if gConnected:
-				if (gDataReceived == 0) and (gConnection != None):
-					DumpActivity("Killing tcp connection after not received any response from client for 2 min", color.cPink)
+				if (gConnection != None):
+					timeTillNodataReceived = 0
+					DumpActivity("Killing tcp connection after not received any response from client for 1 min", color.cPink)
 					KillTcp()
-				gDataReceived = 0
 
-			elif (timeInMin >= 5):
+			elif (timeTillNodataReceived >= 300):
 				DumpActivity("Starting new tcp connection after not connecting to any client for 5 min", color.cPink)
 				KillTcp()
-				timeInMin = 0.0
+				timeTillNodataReceived = 0
 
 
 def Timer1sec():
