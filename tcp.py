@@ -529,7 +529,7 @@ def Timer1sec():
 
 				if (reply != "-"):
 					# motion sensor status key = -1
-					success = SendTcpMessage("-1", reply)
+					success = SendTcpMessage("-1", reply, "motion detected")
 					if (success == 0):
 						return
 					gMotionSensor.ClearTriggeredStatus()
@@ -539,7 +539,7 @@ def Timer1sec():
 
 				if (reply != "-"):
 					# touch sensor status key = -2
-					success = SendTcpMessage("-2", reply)
+					success = SendTcpMessage("-2", reply, "touch sensor triggered")
 					if (success == 0):
 						return
 					gTouchSensor.ClearTriggeredStatus()
