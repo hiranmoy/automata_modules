@@ -119,12 +119,22 @@ def StartSocket():
 
 	# awaiting for message
 	while True:
-		try:
-			tcpData = gConnection.recv(64)
-		except:
-			DumpActivity("Connection interrupted due to not able to receive data", color.cRed)
-			CloseTcpConnection()
-			return 1
+		numRetry = 10
+		while (numRetry > 0):
+			try:
+				tcpData = gConnection.recv(64)
+				break
+			except:
+				numRetry -= 1
+				DumpActivity("Not able to receive data (" + str(10 - numRetry) + ")", color.cRed)
+
+				if (numRetry < 1):
+					DumpActivity("Connection interrupted due to not able to receive data", color.cRed)
+					CloseTcpConnection()
+					return 1
+
+				time.sleep(0.1)
+
 
 		# split tcpData into key and data based '#' char
 		# tcpData = <key>#<data>#
@@ -182,20 +192,30 @@ def SendTcpMessage(key, reply, tcpData, idx=-1):
 
 	tcpReply = tcpReply + reply + "~"
 
-	try:
-		gConnection.send(tcpReply)
-		gDataReceived = 1
+	numRetry = 10
+	while (numRetry > 0):
+		try:
+			gConnection.send(tcpReply)
+			gDataReceived = 1
 
-		if (key[0] == "-"):
-			DumpActivity("Message: " + tcpReply + " sent back (key):" + str(key) + "in response to: " + tcpData + " at " + CurDateTimeStr(), color.cWhite)
-		elif (idx == -1):
-			DumpActivity("Message: " + tcpReply + " sent back in response to: " + tcpData + " at " + CurDateTimeStr(), color.cCyan)
+			if (key[0] == "-"):
+				DumpActivity("Message: " + tcpReply + " sent back (key):" + str(key) + "in response to: " + \
+				             tcpData + " at " + CurDateTimeStr(), color.cWhite)
+			elif (idx == -1):
+				DumpActivity("Message: " + tcpReply + " sent back in response to: " + \
+				             tcpData + " at " + CurDateTimeStr(), color.cCyan)
 
-		return 1
-	except:
-		DumpActivity("Connection interrupted due to not able to send data", color.cRed)
-		CloseTcpConnection()
-		return 0
+			return 1
+		except:
+			numRetry -= 1
+			DumpActivity("Not able to send data (" + str(10 - numRetry) + ")", color.cRed)
+
+			if (numRetry < 1):
+				DumpActivity("Connection interrupted due to not able to send data", color.cRed)
+				CloseTcpConnection()
+				return 0
+
+			time.sleep(0.1)
 
 
 def CloseTcpConnection():
