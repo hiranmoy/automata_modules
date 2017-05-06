@@ -137,19 +137,29 @@ def StartSocket():
 
 
 		# split tcpData into key and data based '#' char
-		# tcpData = <key>#<data>#
+		# tcpData = #<key>=<data>~
 		dataArr = tcpData.split('#')
 		numData = dataArr.__len__()
-		key = ""
-		data = ""
-		if (((numData % 2) != 1) or (numData < 3)):
+		if (numData < 2):
 			DumpActivity("Incorrect tcp data format : " + tcpData, color.cRed)
 			time.sleep(0.1)
 			continue
 		else:
-			for idx in range(0, (numData - 2), 2):
-				key = dataArr[idx]
-				data = dataArr[idx + 1]
+			for idx in range(1, numData):
+				packet = dataArr[idx]
+				if (("~" in packet) == 0):
+					DumpActivity("Broken tcp packet : " + packet, color.cRed)
+					continue
+
+				keyAndQuery = packet[:(packet.__len__() - 1)]
+				packetArr = keyAndQuery.split('=')
+
+				if (packetArr.__len__() != 2):
+					DumpActivity("Incorrect tcp packet format : " + keyAndQuery, color.cRed)
+					continue
+
+				key = packetArr[0]
+				data = packetArr[1]
 
 				# quit
 				if (data == "quit"):
