@@ -211,9 +211,6 @@ class AC(Lirc):
 		# ac swing
 		self.mSw = ["SWOFF", "SWON"]
 
-		# ac turbo
-		self.mTurbo = ["TURBOOFF", "TURBOON"]
-
 	# get setting
 	def GetSetting(self):
 		return self.mSetting
@@ -247,9 +244,8 @@ class AC(Lirc):
 			# 1: temperature
 			# 2: fan speed
 			# 3: swing
-			# 4: turbo
 
-			if (settingsArr.__len__() != 5):
+			if (settingsArr.__len__() != 4):
 				DumpActivity("incorrect ac setting format, assuming default value", color.cRed)
 				return acButton
 
@@ -258,8 +254,7 @@ class AC(Lirc):
 				return (self.mMode[int(settingsArr[0])] + "_" + \
 								settingsArr[1] + "_" + \
 								settingsArr[2] + "_" + \
-								self.mSw[int(settingsArr[3])] + "_" + \
-								self.mTurbo[int(settingsArr[4])])
+								self.mSw[int(settingsArr[3])])
 			elif (settingsArr[0] == "1"):
 				self.mSetting = settings
 				return (self.mMode[int(settingsArr[0])] + "_" + \
