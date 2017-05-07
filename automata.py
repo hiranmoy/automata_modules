@@ -35,11 +35,10 @@
 #			utils2
 #				lirc
 #					appliance
-#						gpio
-#				sensor
-#						gpio
-#							util
-#								enums
+#						sensor
+#							gpio
+#								util
+#									enums
 
 
 import shutil

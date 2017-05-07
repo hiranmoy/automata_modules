@@ -30,19 +30,18 @@
 
 
 from lirc import *
-from sensors import *
 
 
 
-gFluLight = Appliance(2, fluLightGPIO, "fluLight")
-gPlug0 = Appliance(2, plug0GPIO, "plug0")
-gFan = Appliance(1, fanGPIO, "fan")
-gBalconyLight = Appliance(1, balconyLightGPIO, "balconyLight")
-gBulb0 = Appliance(1, bulb0GPIO, "bulb0")
-gPlug1 = Appliance(1, plug1GPIO, "plug1")
-gLEDFlood = LEDFloodLight(0, 1, ledFloodGPIO, "LED", "LED_flood_light")
-gSpeaker = Speaker(1, 1, -1, "SPEAKER", "speaker")
-gAC = AC(2, 1, -1, "AC", "ac")
+gFluLight = Appliance(2, fluLightGPIO, "fluLight", 40)
+gPlug0 = Appliance(2, plug0GPIO, "plug0", 5)
+gFan = Appliance(1, fanGPIO, "fan", 60)
+gBalconyLight = Appliance(1, balconyLightGPIO, "balconyLight", 100)
+gBulb0 = Appliance(1, bulb0GPIO, "bulb0", 100)
+gPlug1 = Appliance(1, plug1GPIO, "plug1", 100)
+gLEDFlood = LEDFloodLight(0, 1, ledFloodGPIO, "LED", "LED_flood_light", 10)
+gSpeaker = Speaker(1, 1, -1, "SPEAKER", "speaker", 28)
+gAC = AC(2, 1, -1, "AC", "ac", 1000)
 
 gTouchSensor = TouchSensor(1, touchGPIO, "Touch_sensor")
 gMotionSensor = MotionSensor(motionGPIO, "Motion_sensor")
@@ -68,6 +67,20 @@ def IsExitTread():
 	return gExit
 
 
+# save all data
+def SaveAllData():
+	SaveSettings()
+
+	pPowerFile = open(GetPowerLogFile(), "w")
+	pSensorFile = open(GetSensorLogFile(), "w")
+
+	SaveProfileOfAllSensors(pSensorFile)
+	SaveProfileOfAllAppliances(pPowerFile, pSensorFile)
+
+	pPowerFile.close()
+	pSensorFile.close()
+
+
 def SaveSettings():
 	pSettingsFile = open(GetSettingsFile(), "w")
 
@@ -79,30 +92,22 @@ def SaveSettings():
 	pSettingsFile.close()
 
 
-def SaveProfileOfAllAppliances():
-	pProfileFile = open(GetPowerLogFile(), "w")
+def SaveProfileOfAllAppliances(pPowerFile, pSensorFile):
+	gFluLight.SaveProfile(pPowerFile, pSensorFile)						# 1
+	gPlug0.SaveProfile(pPowerFile, pSensorFile)								# 2
+	gFan.SaveProfile(pPowerFile, pSensorFile)									# 3
+	gBalconyLight.SaveProfile(pPowerFile, pSensorFile)				# 4
+	gBulb0.SaveProfile(pPowerFile, pSensorFile)								# 5
+	gPlug1.SaveProfile(pPowerFile, pSensorFile)								# 6
+	gLEDFlood.SaveProfile(pPowerFile, pSensorFile)						# 7
+	gAC.SaveProfile(pPowerFile, pSensorFile)									# 8
 
-	gFluLight.SaveProfile(pProfileFile)							# 1
-	gPlug0.SaveProfile(pProfileFile)								# 2
-	gFan.SaveProfile(pProfileFile)									# 3
-	gBalconyLight.SaveProfile(pProfileFile)					# 4
-	gBulb0.SaveProfile(pProfileFile)								# 5
-	gPlug1.SaveProfile(pProfileFile)								# 6
-	gLEDFlood.SaveProfile(pProfileFile)							# 7
-	gAC.SaveProfile(pProfileFile)										# 8
-
-	pProfileFile.close()
-
-
-def SaveProfileOfAllSensors():
-	pProfileFile = open(GetSensorLogFile(), "w")
-
+	
+def SaveProfileOfAllSensors(pProfileFile):
 	gWeather.SaveReadings(pProfileFile)							# 1-3
 	gAlcoholSensor.SaveReadings(pProfileFile)				# 4
 	gCOSensor.SaveReadings(pProfileFile)						# 5
 	gSmokeSensor.SaveReadings(pProfileFile)					# 6
-
-	pProfileFile.close()
 
 
 def RestoreProfileOfAll():
@@ -118,28 +123,28 @@ def RestoreProfileOfAll():
 		lineNum += 1
 
 		if (lineNum == 1):
-			gFluLight.RestoreProfile(line)
+			gFluLight.RestorePowerProfile(line)
 
 		if (lineNum == 2):
-			gPlug0.RestoreProfile(line)
+			gPlug0.RestorePowerProfile(line)
 
 		if (lineNum == 3):
-			gFan.RestoreProfile(line)
+			gFan.RestorePowerProfile(line)
 
 		if (lineNum == 4):
-			gBalconyLight.RestoreProfile(line)
+			gBalconyLight.RestorePowerProfile(line)
 
 		if (lineNum == 5):
-			gBulb0.RestoreProfile(line)
+			gBulb0.RestorePowerProfile(line)
 
 		if (lineNum == 6):
-			gPlug1.RestoreProfile(line)
+			gPlug1.RestorePowerProfile(line)
 
 		if (lineNum == 7):
-			gLEDFlood.RestoreProfile(line)
+			gLEDFlood.RestorePowerProfile(line)
 
 		if (lineNum == 8):
-			gAC.RestoreProfile(line)
+			gAC.RestorePowerProfile(line)
 
 	pProfileFile.close()
 
@@ -153,6 +158,7 @@ def RestoreProfileOfAll():
 				for line in pProfileFile:
 					lineNum += 1
 
+					# sensors ---
 					if (lineNum < 4):
 						gWeather.RestoreReadings(lineNum, line, month, day)
 
@@ -164,6 +170,31 @@ def RestoreProfileOfAll():
 
 					if (lineNum == 6):
 						gSmokeSensor.RestoreReadings(line, month, day)
+
+					# appliances ---
+					if (lineNum == 7):
+						gFluLight.RestoreReadings(line, month, day)
+
+					if (lineNum == 8):
+						gPlug0.RestoreReadings(line, month, day)
+
+					if (lineNum == 9):
+						gFan.RestoreReadings(line, month, day)
+
+					if (lineNum == 10):
+						gBalconyLight.RestoreReadings(line, month, day)
+
+					if (lineNum == 11):
+						gBulb0.RestoreReadings(line, month, day)
+
+					if (lineNum == 12):
+						gPlug1.RestoreReadings(line, month, day)
+
+					if (lineNum == 13):
+						gLEDFlood.RestoreReadings(line, month, day)
+
+					if (lineNum == 14):
+						gAC.RestoreReadings(line, month, day)
 
 				pProfileFile.close()
 
@@ -355,21 +386,25 @@ def Timer1Min():
 			gTouchSensor.ClearTriggeredStatus()
 
 			if (GetAddedLightings() == 1):
-				gFan.UpdateSwitchedProfile()
-				gBalconyLight.UpdateSwitchedProfile()
-				gBulb0.UpdateSwitchedProfile()
-				gPlug1.UpdateSwitchedProfile()
+				gFan.SetApplianceReading()
+				gBalconyLight.SetApplianceReading()
+				gBulb0.SetApplianceReading()
+				gPlug1.SetApplianceReading()
 
 			if (GetAddedLightings() == 2):
-				gFluLight.UpdateSwitchedProfile()
-				gPlug0.UpdateSwitchedProfile()
+				gFluLight.SetApplianceReading()
+				gPlug0.SetApplianceReading()
 
 			if (GetAddedLirc() == 1):
-				gLEDFlood.UpdateSwitchedProfile()
-				gAC.UpdateSwitchedProfile()
+				gLEDFlood.SetApplianceReading()
+				gAC.SetApplianceReading()
 
 			if IsSenseHatAdded():
 				gWeather.UpdateReadings()
 
-			SaveProfileOfAllAppliances()
-			SaveProfileOfAllSensors()
+			if (IsGasSensorAdded() != 1):
+				gAlcoholSensor.SetAlcoholReading()
+				gCOSensor.SetCOReading()
+				gSmokeSensor.SetSmokeReading()
+
+			SaveAllData()

@@ -28,7 +28,7 @@
 # Author: Hiranmoy Basak (hiranmoy.iitkgp@gmail.com)
 
 
-from gpioSetup import *
+from sensors import *
 
 
 
@@ -37,8 +37,11 @@ gDataPointsPerDay = 24	# number of hours in one day
 
 
 # ================================	Appliance class	===============================
-class Appliance():
-	def __init__(self, idx, gpio, name):
+class Appliance(AnalogSensor):
+	def __init__(self, idx, gpio, name, watt):
+		# initalize AnalogSensor class
+		AnalogSensor.__init__(self, name)
+
 		# appliane id, for now multiple appliance can have same id
 		# -1 indicates special appliance like LIRC
 		self.mId = idx
@@ -46,16 +49,11 @@ class Appliance():
 		# GPIO pin corresponding to this appliance
 		self.mGPIO = gpio
 
-		# set name
-		self.mName = name
-
 		# switched on status
 		self.mPoweredOn = 0
 
-		# initialize switched on info
-		self.mPower = []
-		for idx in range(gDataPointsPerDay):
-			self.mPower.append(0)
+		# watt
+		self.mWatt = watt
 
 
 	def SetPoweredOnOnly(self, on=1):
@@ -83,40 +81,22 @@ class Appliance():
 		return self.mPoweredOn
 
 
-	def GetSwitchedOnProfile(self):
-		profileStr = ""
-
-		for idx in range(gDataPointsPerDay):
-			if (idx > 0):
-				profileStr = profileStr + ","
-
-			profileStr = profileStr + str(self.mPower[idx])
-
-		return profileStr
-
-
-	def UpdateSwitchedProfile(self):
-		if ((GetAddedLightings() != self.mId) and (self.mId != -1)):
-			return
-
-		if self.mPoweredOn:
-			self.mPower[datetime.datetime.now().hour] += 1
-
-
-	def SaveProfileOnly(self, pProfileFile):
-		pProfileFile.write("%20s : %s : %s\n" % (self.mName, str(self.mPoweredOn), self.GetSwitchedOnProfile()))
+	def SavePowerSettings(self, pPowerFile):
+		pPowerFile.write("%20s : %s\n" % (self.mName, str(self.mPoweredOn)))
 
 
 	# virtual
-	def SaveProfile(self, pProfileFile):
+	def SaveProfile(self, pPowerFile, pSensorFile):
 		if (GetAddedLightings() != self.mId):
-			pProfileFile.write("\n")
+			pPowerFile.write("\n")
+			pSensorFile.write("\n")
 			return
 
-		self.SaveProfileOnly(pProfileFile)
+		self.SavePowerSettings(pPowerFile)
+		self.SaveReadings(pSensorFile)
 
 
-	def RestoreProfileOnly(self, lineInput):
+	def RestorePowerProfileOnly(self, lineInput):
 		# remove first 23 characters
 		data = lineInput[23:]
 
@@ -124,23 +104,35 @@ class Appliance():
 		self.mPoweredOn = int(data[0:1])
 		self.SetPoweredOn(self.mPoweredOn)
 
-		# remove 3 more characters
-		data = data[3:]
-
-		profileArr = data.split(',')
-		numHrs = profileArr.__len__()
-
-		if (numHrs != gDataPointsPerDay):
-			DumpActivity("Invalid power info for " + self.mName, color.cRed)
-			return
-
-		for idx in range(gDataPointsPerDay):
-			self.mPower[idx] = int(profileArr[idx])
-
 
 	# virtual
-	def RestoreProfile(self, lineInput):
+	def RestorePowerProfile(self, lineInput):
 		if (GetAddedLightings() != self.mId):
 			return
 
-		self.RestoreProfileOnly(lineInput)
+		self.RestorePowerProfileOnly(lineInput)
+
+
+	# virtual
+	def RestoreReadings(self, lineInput, month, day):
+		if (GetAddedLightings() != self.mId):
+			return
+
+		AnalogSensor.RestoreReadings(self, lineInput, month, day)
+
+
+	def SetApplianceReading(self):
+		if (GetAddedLightings() != self.mId):
+			return
+
+		self.SetApplianceReadingOnly()
+
+
+	def SetApplianceReadingOnly(self):
+		curPowerUsage = 0.0
+		if self.mPoweredOn:
+			curPowerUsage = round(self.mWatt / 60.0, 2)
+
+		# update alcohol reading
+		curMinute = (datetime.datetime.now().hour * 60) + datetime.datetime.now().minute
+		AnalogSensor.SetReadings(self, curMinute, curPowerUsage)
