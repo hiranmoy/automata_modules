@@ -455,35 +455,35 @@ def GetTcpReply(data):
 
 	elif (data[0:18] == "GetFluLightProfile"):
 		if (GetAddedLightings() == 2):
-			reply = gFluLight.GetReadings(3, data[19:])
+			reply = gFluLight.GetReadings(1, 3, data[19:])
 
 	elif (data[0:15] == "GetPlug0Profile"):
 		if (GetAddedLightings() == 2):
-			reply = gPlug0.GetReadings(3, data[16:])
+			reply = gPlug0.GetReadings(1, 3, data[16:])
 
 	elif (data[0:22] == "GetBalconyLightProfile"):
 		if (GetAddedLightings() == 1):
-			reply = gBalconyLight.GetReadings(3, data[23:])
+			reply = gBalconyLight.GetReadings(1, 3, data[23:])
 
 	elif (data[0:13] == "GetFanProfile"):
 		if (GetAddedLightings() == 1):
-			reply = gFan.GetReadings(3, data[14:])
+			reply = gFan.GetReadings(1, 3, data[14:])
 
 	elif (data[0:15] == "GetPlug1Profile"):
 		if (GetAddedLightings() == 1):
-			reply = gPlug1.GetReadings(3, data[16:])
+			reply = gPlug1.GetReadings(1, 3, data[16:])
 
 	elif (data[0:15] == "GetBulb0Profile"):
 		if (GetAddedLightings() == 1):
-			reply = gBulb0.GetReadings(3, data[16:])
+			reply = gBulb0.GetReadings(1, 3, data[16:])
 
 	elif (data[0:18] == "GetLEDLightProfile"):
 		if (GetAddedLightings() == 1):
-			reply = gBulb0.GetReadings(3, data[19:])
+			reply = gBulb0.GetReadings(1, 3, data[19:])
 
 	elif (data[0:12] == "GetACProfile"):
 		if (GetAddedLightings() == 1):
-			reply = gBulb0.GetReadings(3, data[13:])
+			reply = gBulb0.GetReadings(1, 3, data[13:])
 
 	SaveAllData()
 

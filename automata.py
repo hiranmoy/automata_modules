@@ -273,8 +273,9 @@ if os.path.isfile(movedActivityLog):
 	shutil.move(movedActivityLog, prevActivityLog)
 
 
-# save current settings
+# save current settings, data
 SaveSettings()
+SaveAllData()
 DumpActivity("Arguments:" + argStr, color.cRed)
 
 
