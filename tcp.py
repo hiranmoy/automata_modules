@@ -55,6 +55,10 @@ gConnection = None
 def KillTcp():
 	global gDataReceived, gConnected, gConnection
 
+	# save current settings, data
+	SaveSettings()
+	SaveAllData()
+
 	DumpActivity("Killed tcp at " + CurDateTimeStr(), color.cRed)
 	command = "sudo fuser -k " + str(gPort) + "/tcp"
 	os.system(command)
