@@ -131,7 +131,7 @@ class Appliance(AnalogSensor):
 	def SetApplianceReadingOnly(self):
 		curPowerUsage = 0.0
 		if self.mPoweredOn:
-			curPowerUsage = round(self.mWatt / 60.0, 2)
+			curPowerUsage = round(self.mWatt)
 
 		# update alcohol reading
 		curMinute = (datetime.datetime.now().hour * 60) + datetime.datetime.now().minute

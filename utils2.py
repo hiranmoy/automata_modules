@@ -33,15 +33,15 @@ from lirc import *
 
 
 
-gFluLight = Appliance(2, fluLightGPIO, "fluLight", 40)
-gPlug0 = Appliance(2, plug0GPIO, "plug0", 5)
-gFan = Appliance(1, fanGPIO, "fan", 60)
-gBalconyLight = Appliance(1, balconyLightGPIO, "balconyLight", 100)
-gBulb0 = Appliance(1, bulb0GPIO, "bulb0", 100)
-gPlug1 = Appliance(1, plug1GPIO, "plug1", 100)
-gLEDFlood = LEDFloodLight(0, 1, ledFloodGPIO, "LED", "LED_flood_light", 10)
-gSpeaker = Speaker(1, 1, -1, "SPEAKER", "speaker", 28)
-gAC = AC(2, 1, -1, "AC", "ac", 1000)
+gFluLight = Appliance(2, fluLightGPIO, "fluLight", 40.0)
+gPlug0 = Appliance(2, plug0GPIO, "plug0", 5.0)
+gFan = Appliance(1, fanGPIO, "fan", 60.0)
+gBalconyLight = Appliance(1, balconyLightGPIO, "balconyLight", 100.0)
+gBulb0 = Appliance(1, bulb0GPIO, "bulb0", 100.0)
+gPlug1 = Appliance(1, plug1GPIO, "plug1", 100.0)
+gLEDFlood = LEDFloodLight(0, 1, ledFloodGPIO, "LED", "LED_flood_light", 10.0)
+gSpeaker = Speaker(1, 1, -1, "SPEAKER", "speaker", 28.0)
+gAC = AC(2, 1, -1, "AC", "ac", 1000.0)
 
 gTouchSensor = TouchSensor(1, touchGPIO, "Touch_sensor")
 gMotionSensor = MotionSensor(motionGPIO, "Motion_sensor")
