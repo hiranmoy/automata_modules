@@ -39,7 +39,7 @@ gLircsEnabled = -1
 
 # =================================	Lirc class	=================================
 class Lirc(Appliance):
-	def __init__(self, lircIdx, lircModuleIdx, gpio, name, config, watt):
+	def __init__(self, lircIdx, lircModuleIdx, lircSelect, gpio, name, config, watt):
 		# initalize Appliance class
 		Appliance.__init__(self, -1, gpio, name, watt)
 
@@ -48,6 +48,9 @@ class Lirc(Appliance):
 
 		# lirc module id
 		self.mLircModuleId = lircModuleIdx
+
+		# lirc gpio select
+		self.mLircSelect = lircSelect
 
 		# Lirc name
 		self.mIRName = name
@@ -99,6 +102,18 @@ class Lirc(Appliance):
 		AnalogSensor.RestoreReadings(self, lineInput, month, day)
 
 
+	def SetupSelectGPIOs(self):
+		if (self.mLircSelect % 2):
+			GPIO.output(lircSelect0GPIO, True)
+		else:
+			GPIO.output(lircSelect0GPIO, False)
+
+		if ((self.mLircSelect / 2) % 2):
+			GPIO.output(lircSelect1GPIO, True)
+		else:
+			GPIO.output(lircSelect1GPIO, False)
+
+
 	def Setup(self, on):
 		global gLircsEnabled
 
@@ -112,6 +127,9 @@ class Lirc(Appliance):
 
 
 		if (self.mLircId != gLircsEnabled):
+			#set up select gpios
+			self.SetupSelectGPIOs()
+
 			command = "sudo cp " + self.mConfig + " /etc/lirc/lircd.conf; " + \
 								"sudo /etc/init.d/lirc stop; " + \
 								"sudo /etc/init.d/lirc start; " + \
@@ -140,9 +158,9 @@ class Lirc(Appliance):
 
 # ===========================	LED Flood Light class	===========================
 class LEDFloodLight(Lirc):
-	def __init__(self, lircIdx, lircModuleIdx, gpio, name, config, watt):
+	def __init__(self, lircIdx, lircModuleIdx, lircSelect, gpio, name, config, watt):
 		# initalize Lirc class
-		Lirc.__init__(self, lircIdx, lircModuleIdx, gpio, name, config, watt)
+		Lirc.__init__(self, lircIdx, lircModuleIdx, lircSelect, gpio, name, config, watt)
 
 		# ir keys for LED buttons
 		self.mArr = ["KEY_A", "KEY_B", "KEY_C", "KEY_D", \
@@ -181,9 +199,9 @@ class LEDFloodLight(Lirc):
 
 # ===========================	Speaker class	===========================
 class Speaker(Lirc):
-	def __init__(self, lircIdx, lircModuleIdx, gpio, name, config, watt):
+	def __init__(self, lircIdx, lircModuleIdx, lircSelect, gpio, name, config, watt):
 		# initalize Lirc class
-		Lirc.__init__(self, lircIdx, lircModuleIdx, gpio, name, config, watt)
+		Lirc.__init__(self, lircIdx, lircModuleIdx, lircSelect, gpio, name, config, watt)
 
 		# ir keys for speaker buttons
 		self.mArr = ["KEY_POWER", "KEY_MUTE", \
@@ -213,9 +231,9 @@ class Speaker(Lirc):
 
 # ===========================	AC class	===========================
 class AC(Lirc):
-	def __init__(self, lircIdx, lircModuleIdx, gpio, name, config, watt):
+	def __init__(self, lircIdx, lircModuleIdx, lircSelect, gpio, name, config, watt):
 		# initalize Lirc class
-		Lirc.__init__(self, lircIdx, lircModuleIdx, gpio, name, config, watt)
+		Lirc.__init__(self, lircIdx, lircModuleIdx, lircSelect, gpio, name, config, watt)
 
 		# ac setting
 		self.mSetting = ""

@@ -45,6 +45,9 @@ lightGPIO = 21
 fluLightGPIO = 26
 plug0GPIO = 20
 
+lircSelect0GPIO = 13
+lircSelect1GPIO = 19
+
 balconyLightGPIO = 12	# not used right now
 
 fanGPIO = 20
@@ -98,19 +101,6 @@ def SetupGPIOs():
 		# LED flood light
 		GPIO.setup(ledFloodGPIO, GPIO.OUT)
 
-
-# clear all GPIOs
-def ClearGPIO():
-	if (GetAddedLightings() == 1):
-		GPIO.output(fanGPIO, False)
-		GPIO.output(balconyLightGPIO, False)
-		GPIO.output(bulb0GPIO, False)
-		GPIO.output(plug1GPIO, False)
-
-	if (GetAddedLightings() == 2):
-		GPIO.output(fluLightGPIO, False)
-		GPIO.output(lightGPIO, False)
-		GPIO.output(plug0GPIO, False)
-
-	if (GetAddedLirc() == 1):
-		GPIO.output(ledFloodGPIO, False)
+		# lirc select
+		GPIO.setup(lircSelect0GPIO, GPIO.OUT)
+		GPIO.setup(lircSelect1GPIO, GPIO.OUT)
