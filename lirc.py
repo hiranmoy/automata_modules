@@ -58,6 +58,23 @@ class Lirc(Appliance):
 		# config file
 		self.mConfig = GetAutomataDir() + config + ".conf"
 
+		# setting
+		self.mSetting = ""
+
+
+	# get setting
+	def GetSetting(self):
+		return self.mSetting
+
+
+	# virtual : set setting
+	def SetSetting(self, setting):
+		if (setting[0] == " "):
+			DumpActivity("no " + self.mName + " setting", color.cCyan)
+			return
+
+		self.mSetting = setting
+
 
 	# virtual
 	def SetPoweredOn(self, on=1):
@@ -136,9 +153,6 @@ class Lirc(Appliance):
 								"sudo lircd -d /dev/lirc0"
 			os.system(command)
 
-			# wait for 1 sec
-			#time.sleep(1)
-
 			gLircsEnabled = self.mLircId
 
 
@@ -147,12 +161,19 @@ class Lirc(Appliance):
 		if (GetAddedLirc() != self.mLircModuleId):
 			return
 
+		irKey = self.GetKEYs(signalStr)
+
 		# basic setup
 		self.Setup(1)
 
-		command = "irsend SEND_ONCE " + self.mIRName + " " + signalStr
+		command = "irsend SEND_ONCE " + self.mIRName + " " + irKey
 		os.system(command)
-		DumpActivity(self.mIRName + " key " + signalStr + " pressed", color.cWhite)
+		DumpActivity(self.mIRName + " key " + irKey + " pressed", color.cWhite)
+
+
+	# vitual : convert button index to button name
+	def GetKEYs(self, signalStr):
+		return ""
 
 
 
@@ -172,19 +193,20 @@ class LEDFloodLight(Lirc):
 
 
 	# virtual
-	def RestoreProfile(self, lineInput):
+	def RestorePowerProfile(self, lineInput):
 		if (GetAddedLirc() != self.mLircModuleId):
 			return
 
-		self.RestoreProfileOnly(lineInput)
+		self.RestorePowerProfileOnly(lineInput)
 
 		if self.CheckIfOn():
-			# press on "off" button (3) if switched on
-			self.SendIRSignal(self.GetLEDKEYs(3))
+			self.SendIRSignal(self.mSetting)
 	
 
-	# convert button index to button name
-	def GetLEDKEYs(self, button):
+	# virtual
+	def GetKEYs(self, signalStr):
+		button = int(signalStr)
+
 		# default: off (KEY_C)
 		ledButton = self.mArr[2]
 
@@ -193,6 +215,7 @@ class LEDFloodLight(Lirc):
 		else:
 			DumpActivity("incorrect LED button number, assuming default value", color.cRed)
 
+		self.mSetting = signalStr
 		return ledButton
 
 
@@ -216,7 +239,9 @@ class Speaker(Lirc):
 
 
 	# convert button index to button name
-	def GetSpeakerKEYs(self, button):
+	def GetKEYs(self, signalStr):
+		button = int(signalStr)
+
 		# default: aux (KEY_AUX)
 		speakerButton = self.mArr[21]
 
@@ -235,9 +260,6 @@ class AC(Lirc):
 		# initalize Lirc class
 		Lirc.__init__(self, lircIdx, lircModuleIdx, lircSelect, gpio, name, config, watt)
 
-		# ac setting
-		self.mSetting = ""
-
 		# ac on/off
 		self.mPw = ["OFF", "ON"]
 
@@ -247,23 +269,16 @@ class AC(Lirc):
 		# ac swing
 		self.mSw = ["SWOFF", "SWON"]
 
-	# get setting
-	def GetSetting(self):
-		return self.mSetting
 
-
-	# set setting
+	# virtual
 	def SetSetting(self, setting):
-		if (setting[0] == " "):
-			DumpActivity("no ac setting", color.cCyan)
+		Lirc.SetSetting(self, setting)
 
-		self.mSetting = setting
-		irKey = self.GetACKEYs(setting)
-		self.SendIRSignal(irKey)
+		self.SendIRSignal(setting)
 
 
 	# convert button index to button name
-	def GetACKEYs(self, settings):
+	def GetKEYs(self, settings):
 		# default: off (OFF)
 		acButton = self.mPw[1]
 

@@ -125,6 +125,11 @@ def RestoreSettings():
 			else:
 				gAC.SetSetting(val)
 
+		elif (lineNum == 5):
+			# rgb led setting
+			settings = val[0:2]
+			gLEDFlood.SetSetting(settings)
+
 		else:
 			pSettingsFile.close()
 			DumpActivity("Invalid settings file", color.cRed)

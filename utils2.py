@@ -88,6 +88,7 @@ def SaveSettings():
 	pSettingsFile.write(str(GetIsDisableVideo()) + "            : Disable Video\n")										# 2
 	pSettingsFile.write(str(GetIsDisableAudio()) + "            : Disable Audio\n")										# 3
 	pSettingsFile.write(str(gAC.GetSetting()) + "            : AC settings\n")												# 4
+	pSettingsFile.write(str(gLEDFlood.GetSetting()) + "            : rgb led settings\n")							# 5
 
 	pSettingsFile.close()
 

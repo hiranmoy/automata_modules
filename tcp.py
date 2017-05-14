@@ -385,14 +385,12 @@ def GetTcpReply(data):
 
 	elif (data[0:20] == "ClickOnLEDFloodLight"):
 		if (GetAddedLirc() == 1):
-			irKey = gLEDFlood.GetLEDKEYs(int(data[21:23]))
-			gLEDFlood.SendIRSignal(irKey)
+			gLEDFlood.SendIRSignal(data[21:23])
 			reply = "LED Flood Light button " + data[21:23] + " pressed"
 
 	elif (data[0:14] == "ClickOnSpeaker"):
 		if (GetAddedLirc() == 1):
-			irKey = gSpeaker.GetSpeakerKEYs(int(data[15:17]))
-			gSpeaker.SendIRSignal(irKey)
+			gSpeaker.SendIRSignal(data[15:17])
 			reply = "Speaker button " + data[15:17] + " pressed"
 
 	elif (data == "GetACSetting"):
@@ -401,8 +399,7 @@ def GetTcpReply(data):
 
 	elif (data[0:9] == "ClickOnAC"):
 		if (GetAddedLirc() == 1):
-			irKey = gAC.GetACKEYs(data[10:])
-			gAC.SendIRSignal(irKey)
+			gAC.SendIRSignal(data[10:])
 			reply = "AC button " + data[10:] + " pressed"
 
 	elif (data[0:18] == "EnableMotionDetect"):
