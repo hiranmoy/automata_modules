@@ -482,12 +482,16 @@ def GetTcpReply(data):
 			reply = gBulb0.GetReadings(1, 3, data[16:])
 
 	elif (data[0:18] == "GetLEDLightProfile"):
-		if (GetAddedLightings() == 1):
-			reply = gBulb0.GetReadings(1, 3, data[19:])
+		if (GetAddedLirc() == 1):
+			reply = gLEDFlood.GetReadings(1, 3, data[19:])
+
+	elif (data[0:17] == "GetSpeakerProfile"):
+		if (GetAddedLirc() == 1):
+			reply = gSpeaker.GetReadings(1, 3, data[18:])
 
 	elif (data[0:12] == "GetACProfile"):
-		if (GetAddedLightings() == 1):
-			reply = gBulb0.GetReadings(1, 3, data[13:])
+		if (GetAddedLirc() == 1):
+			reply = gAC.GetReadings(1, 3, data[13:])
 
 	SaveAllData()
 
